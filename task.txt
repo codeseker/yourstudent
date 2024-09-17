@@ -1,0 +1,14 @@
+Admin () => {
+    /auth ✅
+    /admin/upload ✅
+    /admin/data (all complete data at once) (batchwise)
+    /admin/batch?2021  
+    /admin/studentDetail
+    /admin/studentDetail/edit 
+    /admin/delete 
+}
+
+Teachers () => {
+    /data 
+    /studentDetail
+}
