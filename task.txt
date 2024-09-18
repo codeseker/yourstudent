@@ -1,13 +1,13 @@
 Admin () => {
     /auth ✅
     /admin/upload ✅
-    /admin/data (all complete data at once) (batchwise)
-    /admin/batch?2021  
-    /admin/studentDetail
+    /admin/data (all complete data at once) (batchwise) [2020, 2021, 2022] ✅
+    /admin/batch?2021  ✅
     /admin/studentDetail/edit 
     /admin/delete 
 }
 
+studentDetail/piet21cs034 ✅
 Teachers () => {
     /data 
     /studentDetail
