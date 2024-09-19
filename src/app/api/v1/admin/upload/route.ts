@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
-
-import NodeCache from "node-cache";
 import { addDataToDb } from "@/app/lib/firebaseFunctions";
-const cache = new NodeCache({ stdTTL: 3600 });
+import cache from "@/app/lib/cache";
 
 export async function POST(req: NextRequest) {
   try {

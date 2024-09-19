@@ -1,8 +1,6 @@
 import { getBatchData } from "@/app/lib/firebaseFunctions";
 import { NextRequest, NextResponse } from "next/server";
-import NodeCache from "node-cache";
-
-const cache = new NodeCache({ stdTTL: 3600 });
+import cache from "@/app/lib/cache";
 
 export async function GET(req: NextRequest) {
   try {

@@ -1,4 +1,11 @@
-import { collection, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import NodeCache from "node-cache";
 import firebaseData, {
@@ -95,6 +102,35 @@ export async function getStudentDetail(batch: string, regNo: string) {
   } catch (error: any) {
     return {
       message: "Error fetching student data",
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+export async function editDetail(batch: string, regNo: string, number: string) {
+  try {
+    const batchDocRef = doc(db, "batches", batch);
+
+    const studentDocRef = doc(batchDocRef, "students", regNo);
+
+    // Get the student's document
+    const studentDoc = await getDoc(studentDocRef);
+
+    // Check if the student's document exists
+    if (!studentDoc.exists()) {
+      return { message: "Student not found", success: false };
+    }
+
+    // Update the mobile number in the student's document
+    await updateDoc(studentDocRef, {
+      mobileNumber: number,
+    });
+
+    return { message: "Mobile number updated successfully", success: true };
+  } catch (error: any) {
+    return {
+      message: "Error fetching or updating student data",
       success: false,
       error: error.message,
     };
