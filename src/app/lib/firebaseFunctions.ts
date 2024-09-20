@@ -60,13 +60,16 @@ export async function getBatchData(batch: string) {
 
     // Extract name and regNo from each student's document
     const studentsData = studentsSnapshot.docs.map((doc) => ({
-      regNo: doc.data()[firebaseData.regNo],
+      id: doc.data()[firebaseData.regNo],
       name: doc.data()[firebaseData.fullName],
+      regNo: doc.data()[firebaseData.regNo],
       mobileNumber: doc.data()[firebaseData.mobileNumber],
+      section: doc.data()[firebaseData.section],
     }));
 
     // Return the batch data along with all students' information
     return {
+      message: "Batch Data Fetched",
       success: true,
       batch: batchDoc.id,
       students: studentsData,
@@ -135,4 +138,11 @@ export async function editDetail(batch: string, regNo: string, number: string) {
       error: error.message,
     };
   }
+}
+
+// Function to get the count of student documents for a given batch
+export async function getStudentCount(batchYear: string) {
+  const studentsCollection = collection(db, `batches/${batchYear}/students`);
+  const studentsSnapshot = await getDocs(studentsCollection);
+  return studentsSnapshot.size;
 }

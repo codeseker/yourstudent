@@ -2,6 +2,8 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { ModeToggle } from "./components/Mode";
 
 export default function Home() {
   const { data: session } = useSession();
@@ -16,13 +18,13 @@ export default function Home() {
 
   return (
     <div>
-      <button className="bg-white text-black w-14" onClick={() => signIn()}>
-        Login
-      </button>
+      {session?.user ? (
+        <Button onClick={() => signOut()}>Logout</Button>
+      ) : (
+        <Button onClick={() => signIn()}>Login</Button>
+      )}
 
-      <button className="bg-white text-black w-24" onClick={() => signOut()}>
-        Logout
-      </button>
+      <ModeToggle />
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import cache from "@/app/lib/cache";
+import { getStudentCount } from "@/app/lib/firebaseFunctions";
+import firebaseData from "@/app/lib/firebaseData";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,7 +23,18 @@ export async function GET(req: NextRequest) {
     // If not cached, fetch from Firestore
     const batchesCollection = collection(db, "batches");
     const batchesSnapshot = await getDocs(batchesCollection);
-    const allYears = batchesSnapshot.docs.map((doc) => doc.id);
+    const allYears = await Promise.all(
+      batchesSnapshot.docs.map(async (doc) => {
+        const id = doc.data()[firebaseData.regNo];
+        const year = doc.id;
+        const studentCount = await getStudentCount(year);
+        return {
+          id: id,
+          year: year,
+          total: studentCount,
+        };
+      })
+    );
 
     // Store the data in cache
     cache.set("batches", allYears);
