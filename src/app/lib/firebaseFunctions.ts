@@ -99,6 +99,7 @@ export async function getStudentDetail(batch: string, regNo: string) {
     }
 
     return {
+      message: "Student Fetched Successfully",
       success: true,
       studentData: studentDoc.data(),
     };

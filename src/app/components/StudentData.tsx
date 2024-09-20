@@ -98,7 +98,11 @@ export const columns: ColumnDef<Student>[] = [
       const student = row.original;
 
       return (
-        <Button onClick={() => alert(`Viewing details for ${student.name}`)}>
+        <Button
+          onClick={() =>
+            (window.location.href = `/admin/studentdetail/2021/${student.regNo}`)
+          }
+        >
           View Details
         </Button>
       );
@@ -109,10 +113,9 @@ export const columns: ColumnDef<Student>[] = [
 // Main component
 interface StudentTableProps {
   data: Student[];
-  theme: "light" | "dark"; // Add this prop to pass the theme
 }
 
-export function StudentDataTable({ data, theme }: StudentTableProps) {
+export function StudentDataTable({ data }: StudentTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -141,7 +144,7 @@ export function StudentDataTable({ data, theme }: StudentTableProps) {
   });
 
   return (
-    <div className={`w-full ${theme === "dark" ? "dark" : ""}`}>
+    <div className={""}>
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter Registeration Number..."

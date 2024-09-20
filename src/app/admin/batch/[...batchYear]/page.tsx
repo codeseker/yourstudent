@@ -31,15 +31,13 @@ function BatchDetail() {
       const batchData: BatchResponse = await getBatchData();
 
       if (!batchData.success) {
-        console.log(batchData.message);
       } else {
-        console.log(batchData);
         setStudents(batchData.students);
       }
     };
 
     fetchBatchData();
-  }, []);
+  }, [batchYear]);
 
   const getBatchData = async () => {
     try {
