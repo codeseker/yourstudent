@@ -1,10 +1,13 @@
 "use client";
 
+import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import Sidebar from "@/app/components/Sidebar";
 import { StudentDataTable } from "@/app/components/StudentData";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface Student {
   id: string;
@@ -13,6 +16,8 @@ interface Student {
   regNo: string;
   mobileNumber: string;
   section: string;
+  primaryEmailId: string;
+  cgpa: string | number;
 }
 
 interface BatchResponse {
@@ -25,14 +30,22 @@ interface BatchResponse {
 function BatchDetail() {
   const { batchYear } = useParams();
   const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchBatchData = async () => {
-      const batchData: BatchResponse = await getBatchData();
+      try {
+        const batchData: BatchResponse = await getBatchData();
 
-      if (!batchData.success) {
-      } else {
-        setStudents(batchData.students);
+        if (!batchData.success) {
+        } else {
+          setStudents(batchData.students);
+          toast("Batch data Fetched");
+        }
+      } catch (error) {
+        toast("Error loading data");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -54,23 +67,26 @@ function BatchDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
-      <Sidebar />
+    <div>
+      {loading ? (
+        <AdminPanelSkeleton />
+      ) : (
+        <div className="min-h-screen flex flex-col md:flex-row dark:bg-background">
+          <div className="border-r shadow">
+            <Sidebar />
+          </div>
 
-      <div className="flex-grow p-6">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full">
-          <input
-            type="text"
-            placeholder="Search Anything..."
-            className="p-2 border rounded-lg w-full md:w-1/2 mb-4 md:mb-0"
-          />
-          <button className="p-2 bg-blue-500 text-white rounded-lg w-full md:w-auto">
-            + Add New Student
-          </button>
+          <div className="flex-grow p-6">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full">
+              <Button className="p-2 px-4 rounded-lg w-full md:w-auto">
+                + Add New Student
+              </Button>
+            </div>
+
+            <StudentDataTable data={students} />
+          </div>
         </div>
-
-        <StudentDataTable data={students} />
-      </div>
+      )}
     </div>
   );
 }

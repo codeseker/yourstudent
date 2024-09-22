@@ -1,5 +1,6 @@
 "use client";
 import StudentProfile from "@/app/components/StudentDetail";
+import StudentDetailSkeleton from "@/app/components/StudentDetailSkeleton";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -112,7 +113,11 @@ const StudentDetail = () => {
 
   return (
     <div>
-      {student ? <StudentProfile studentData={student} /> : <p>Loading...</p>}
+      {student ? (
+        <StudentProfile studentData={student} />
+      ) : (
+        <StudentDetailSkeleton />
+      )}
     </div>
   );
 };

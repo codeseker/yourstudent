@@ -65,6 +65,8 @@ export async function getBatchData(batch: string) {
       regNo: doc.data()[firebaseData.regNo],
       mobileNumber: doc.data()[firebaseData.mobileNumber],
       section: doc.data()[firebaseData.section],
+      primaryEmailId: doc.data()[firebaseData.primaryEmailId],
+      cgpa: doc.data()[firebaseData.cgpa],
     }));
 
     // Return the batch data along with all students' information

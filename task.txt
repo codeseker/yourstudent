@@ -9,6 +9,8 @@ Admin () => {
 /student/editContact ✅
 studentDetail/piet21cs034 ✅
 
+
+
 Teachers () => {
     /data 
     /studentDetail

@@ -16,7 +16,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 
 export type Batches = {
   id: string;
@@ -40,26 +40,13 @@ export type Batches = {
 
 export const columns: ColumnDef<Batches>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    accessorKey: "sno",
+    header: () => <div className="text-left">S No</div>,
+    cell: ({ row, table }) => {
+      const index = table.getSortedRowModel().rows.indexOf(row) + 1;
+
+      return <div className="text-left font-medium">{index}</div>;
+    },
   },
   {
     accessorKey: "year",
@@ -139,8 +126,16 @@ export function BatchesData({ data }: BatchTableProps) {
   });
 
   return (
-    <div className="w-full">
+    <div>
       <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter By Year..."
+          value={(table.getColumn("year")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("year")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm mr-4"
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -169,16 +164,16 @@ export function BatchesData({ data }: BatchTableProps) {
         </DropdownMenu>
       </div>
 
-      {/* Apply more padding and better styling for table */}
-      <div className="rounded-md border">
-        <Table className="table-auto w-full">
+      {/* Table Styling */}
+      <div className="rounded-md">
+        <Table className="rounded table-auto w-full ">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-50">
+              <TableRow key={headerGroup.id} className="">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="px-4 py-2 text-left text-gray-700 font-semibold"
+                    className="px-4 py-2 text-left font-semibold"
                   >
                     {header.isPlaceholder
                       ? null
@@ -198,10 +193,10 @@ export function BatchesData({ data }: BatchTableProps) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-100 transition-all duration-200"
+                  className="transition-all duration-200"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-4 py-2 border-t">
+                    <TableCell key={cell.id} className="px-4 py-2">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -214,7 +209,7 @@ export function BatchesData({ data }: BatchTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-gray-500"
+                  className="h-24 text-center"
                 >
                   No results.
                 </TableCell>
@@ -226,10 +221,6 @@ export function BatchesData({ data }: BatchTableProps) {
 
       {/* Pagination and other controls */}
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-gray-600">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="space-x-2">
           <Button
             variant="outline"

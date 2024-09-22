@@ -16,7 +16,6 @@ import {
 } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -32,6 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Data type for each student
 export type Student = {
@@ -41,6 +41,8 @@ export type Student = {
   name: string;
   mobileNumber: string;
   section: string;
+  primaryEmailId: string;
+  cgpa: string | number;
 };
 
 // Define the columns for the table
@@ -49,11 +51,10 @@ export const columns: ColumnDef<Student>[] = [
     accessorKey: "image",
     header: () => <div className="text-left">Image</div>,
     cell: ({ row }) => (
-      <img
-        src={row.getValue("image")}
-        alt="Student"
-        className="h-12 w-12 rounded-full"
-      />
+      <Avatar>
+        <AvatarImage src="https://github.com/shadcn.png" />
+        <AvatarFallback>At</AvatarFallback>
+      </Avatar>
     ),
   },
   {
@@ -69,13 +70,20 @@ export const columns: ColumnDef<Student>[] = [
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="text-left px-0"
+        className="text-left px-0 w-20"
       >
         Name
         <CaretSortIcon className="h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="text-left">{row.getValue("name")}</div>,
+    cell: ({ row }) => {
+      const value: string = row.getValue("name");
+      return (
+        <div className="text-left capitalize font-semibold text-md">
+          {value.toLowerCase()}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "mobileNumber",
@@ -92,15 +100,26 @@ export const columns: ColumnDef<Student>[] = [
     ),
   },
   {
+    accessorKey: "cgpa",
+    header: () => <div className="text-left">CGPA</div>,
+    cell: ({ row }) => <div className="text-left">{row.getValue("cgpa")}</div>,
+    filterFn: (row, columnId, filterValue) => {
+      const cgpaValue = parseFloat(row.getValue(columnId));
+      const filterNumber = parseFloat(filterValue);
+
+      return !isNaN(filterNumber) && cgpaValue >= filterNumber;
+    },
+  },
+  {
     id: "actions",
     header: () => <div className="text-left">Actions</div>,
     cell: ({ row }) => {
       const student = row.original;
-
+      const year = student.primaryEmailId.substring(0, 4);
       return (
         <Button
           onClick={() =>
-            (window.location.href = `/admin/studentdetail/2021/${student.regNo}`)
+            (window.location.href = `/admin/studentdetail/${year}/${student.regNo}`)
           }
         >
           View Details
@@ -144,15 +163,25 @@ export function StudentDataTable({ data }: StudentTableProps) {
   });
 
   return (
-    <div className={""}>
+    <div>
       <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter By CGPA..."
+          value={
+            (table.getColumn("cgpa")?.getFilterValue() as string | number) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("cgpa")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm mr-4"
+        />
         <Input
           placeholder="Filter Registeration Number..."
           value={(table.getColumn("regNo")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("regNo")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm"
+          className="max-w-sm "
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -183,15 +212,15 @@ export function StudentDataTable({ data }: StudentTableProps) {
       </div>
 
       {/* Table Styling */}
-      <div className="rounded-md border">
-        <Table className="table-auto w-full">
+      <div className="rounded-md">
+        <Table className="rounded table-auto w-full ">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-gray-50">
+              <TableRow key={headerGroup.id} className="">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="px-4 py-2 text-left text-gray-700 font-semibold"
+                    className="px-4 py-2 text-left font-semibold"
                   >
                     {header.isPlaceholder
                       ? null
@@ -211,10 +240,10 @@ export function StudentDataTable({ data }: StudentTableProps) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="dark:bg-background hover:dark:bg-secondary-foreground transition-all duration-200"
+                  className="transition-all duration-200"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-4 py-2 border-t ">
+                    <TableCell key={cell.id} className="px-4 py-2">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -227,7 +256,7 @@ export function StudentDataTable({ data }: StudentTableProps) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-gray-500"
+                  className="h-24 text-center"
                 >
                   No results.
                 </TableCell>
@@ -239,10 +268,6 @@ export function StudentDataTable({ data }: StudentTableProps) {
 
       {/* Pagination and other controls */}
       <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-gray-600">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
         <div className="space-x-2">
           <Button
             variant="outline"

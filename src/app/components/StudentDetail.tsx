@@ -77,7 +77,7 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
           {/* Left Section */}
-          <div className="col-span-1 sm:col-span-1">
+          <div className="col-span-1 sm:col-span-1 shadow-lg border">
             <div className="bg-card  shadow rounded-lg p-6">
               <div className="flex flex-col items-center">
                 <img
@@ -142,9 +142,11 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
           </div>
 
           {/* Right Section */}
-          <div className="col-span-2 sm:col-span-2">
-            <div className=" bg-card dark:text-foreground shadow rounded-lg p-6">
-              <h2 className="text-xl font-bold mb-4">Academic Details</h2>
+          <div className="col-span-2 sm:col-span-2 ">
+            <div className=" bg-card dark:text-foreground shadow-lg rounded-lg p-6 border">
+              <h2 className="text-xl font-bold mb-4 text-primary">
+                Academic Details
+              </h2>
 
               {/* Semester-wise Performance */}
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
