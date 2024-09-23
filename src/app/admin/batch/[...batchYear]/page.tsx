@@ -78,7 +78,10 @@ function BatchDetail() {
 
           <div className="flex-grow p-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full">
-              <Button className="p-2 px-4 rounded-lg w-full md:w-auto">
+              <Button
+                onClick={() => (window.location.href = "/admin/upload")}
+                className="p-2 px-4 rounded-lg w-full md:w-auto"
+              >
                 + Add New Student
               </Button>
             </div>
