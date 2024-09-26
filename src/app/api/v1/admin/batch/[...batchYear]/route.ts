@@ -11,8 +11,6 @@ export async function GET(req: NextRequest) {
     const match = pathname.match(/\/admin\/batch\/(\d+)/);
     const batchYear = match ? match[1] : null;
 
-    console.log(batchYear);
-
     if (!batchYear) {
       return NextResponse.json(
         { message: "Batch year not provided", success: false },

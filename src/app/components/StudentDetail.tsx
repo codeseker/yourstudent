@@ -65,6 +65,9 @@ type StudentData = {
   permanentAddress: string;
   homeTown: string;
   motherName: string;
+  [key: `sem${number}Marks`]: number | string | null;
+  [key: `sem${number}Percentage`]: number | string | null;
+  [key: `sem${number}Backlogs`]: number | string | null;
 };
 
 interface StudentDataProp {
@@ -73,27 +76,30 @@ interface StudentDataProp {
 
 const StudentProfile = ({ studentData }: StudentDataProp) => {
   return (
-    <div className="dark:text-foreground">
+    <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
           {/* Left Section */}
-          <div className="col-span-1 sm:col-span-1 shadow-lg border">
-            <div className="bg-card  shadow rounded-lg p-6">
+          <div className="col-span-1 sm:col-span-1">
+            <div className="bg-card shadow rounded-lg p-6">
               <div className="flex flex-col items-center">
                 <img
                   src="https://randomuser.me/api/portraits/men/94.jpg"
-                  className="w-32 h-32 bg-gray-300 rounded-full mb-4 shrink-0"
+                  className="w-32 h-32 bg-gray-300 rounded-full mb-4"
                   alt="Profile"
                 />
-                <h1 className="text-xl font-bold capitalize">
-                  {studentData.fullName.toLowerCase()}
-                </h1>
-                <p className="">{studentData.branch}</p>
-                <div className="mt-6 flex flex-wrap gap-4 justify-end">
-                  <Button>Contact</Button>
+                <h1 className="text-xl font-bold">{studentData.fullName}</h1>
+                <p className="text-gray-700">{studentData.branch}</p>
+                <div className="mt-6 flex flex-wrap gap-4 justify-center">
+                  <Button
+                    // href={`mailto:${studentData.primaryEmailId}`}
+                    className="py-2 px-4 rounded"
+                  >
+                    Edit Contact
+                  </Button>
                 </div>
               </div>
-              <hr className="my-6 border-t border" />
+              <hr className="my-6 border-t border-gray-300" />
 
               {/* Personal Details Section */}
               <div className="flex flex-col">
@@ -127,9 +133,6 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                     <strong>Home Town:</strong> {studentData.homeTown}
                   </li>
                   <li className="mb-2">
-                    <strong>Medium:</strong> {studentData.medium}
-                  </li>
-                  <li className="mb-2">
                     <strong>State:</strong> {studentData.state}
                   </li>
                   <li className="mb-2">
@@ -142,131 +145,111 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
           </div>
 
           {/* Right Section */}
-          <div className="col-span-2 sm:col-span-2 ">
-            <div className=" bg-card dark:text-foreground shadow-lg rounded-lg p-6 border">
-              <h2 className="text-xl font-bold mb-4 text-primary">
-                Academic Details
-              </h2>
-
-              {/* Semester-wise Performance */}
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <li className="mb-2">
-                  <strong>Sem 1:</strong> Marks: {studentData.sem1Marks},
-                  Percentage: {studentData.sem1Percentage}%, Backlogs:{" "}
-                  {studentData.sem1BackLogs}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 2:</strong> Marks: {studentData.sem2Marks},
-                  Percentage: {studentData.sem2Percentage}%, Backlogs:{" "}
-                  {studentData.sem2Backlogs}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 3:</strong> Marks: {studentData.sem3Marks},
-                  Percentage: {studentData.sem3Percentage}%, Backlogs:{" "}
-                  {studentData.sem3Backlogs}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 4:</strong> Marks: {studentData.sem4Marks},
-                  Percentage: {studentData.sem4Percentage}%, Backlogs:{" "}
-                  {studentData.sem4Backlogs}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 5:</strong> Marks: {studentData.sem5Marks},
-                  Percentage: {studentData.sem5Percentage}%, Backlogs:{" "}
-                  {studentData.sem5Backlogs}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 6:</strong> Marks:{" "}
-                  {studentData.sem6Marks || "N/A"}, Percentage:{" "}
-                  {studentData.sem6Percentage || "N/A"}, Backlogs:{" "}
-                  {studentData.sem6Backlogs || "N/A"}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 7:</strong> Marks:{" "}
-                  {studentData.sem7Marks || "N/A"}, Percentage:{" "}
-                  {studentData.sem7Percentage || "N/A"}, Backlogs:{" "}
-                  {studentData.sem7Backlogs || "N/A"}
-                </li>
-                <li className="mb-2">
-                  <strong>Sem 8:</strong> Marks:{" "}
-                  {studentData.sem8Marks || "N/A"}, Percentage:{" "}
-                  {studentData.sem8Percentage || "N/A"}, Backlogs:{" "}
-                  {studentData.sem8Backlogs || "N/A"}
-                </li>
-              </ul>
-
-              <hr className="my-6 border-t border-gray-300" />
-
-              {/* Additional Academic Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p>
-                  <strong>University Roll No:</strong>{" "}
-                  {studentData.universityRollNo}
-                </p>
-                <p>
-                  <strong>Registration Number:</strong> {studentData.regNo}
-                </p>
-                <p>
-                  <strong>Total Backlogs:</strong> {studentData.totalBacklogs}
-                </p>
-                <p>
-                  <strong>CGPA:</strong> {studentData.cgpa}
-                </p>
-                <p>
-                  <strong>UG Percentage:</strong> {studentData.ugPercentage}%
-                </p>
-                <p>
-                  <strong>12th Percentage:</strong>{" "}
-                  {studentData.twelfthPercentage}%
-                </p>
-                <p>
-                  <strong>10th Percentage:</strong>{" "}
-                  {studentData.tenthPercentage}%
-                </p>
-                <p>
-                  <strong>Status:</strong> {studentData.status}
-                </p>
-                <p>
-                  <strong>Academic Gap:</strong> {studentData.academicGap} years
-                </p>
-                <p>
-                  <strong>Tenth Board Name:</strong>{" "}
-                  {studentData.tenthBoardName}
-                </p>
-                <p>
-                  <strong>Twelfth Board Name:</strong>{" "}
-                  {studentData.twelfthBoardName}
-                </p>
-                <p>
-                  <strong>Tenth Year of Pass:</strong>{" "}
-                  {studentData.tenthYearOfPass}
-                </p>
-                <p>
-                  <strong>Twelfth Year of Pass:</strong>{" "}
-                  {studentData.twelfthYearOfPass}
-                </p>
-                <p>
-                  <strong>Tenth Max Marks:</strong> {studentData.tenthMaxMarks}
-                </p>
-                <p>
-                  <strong>Twelfth Max Marks:</strong>{" "}
-                  {studentData.twelfthMaxMarks}
-                </p>
-                <p>
-                  <strong>Obtained Marks:</strong> {studentData.obtainedMarks}
-                </p>
-                <p>
-                  <strong>Max Marks:</strong> {studentData.maxMarks}
-                </p>
-                <p>
-                  <strong>Twelfth and UG Gap:</strong>{" "}
-                  {studentData.twelfthAndUgGap}
-                </p>
-                <p>
-                  <strong>Tenth and Twelfth Gap:</strong>{" "}
-                  {studentData.tenthAndTwelfthGap}
-                </p>
+          <div className="col-span-2 sm:col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Tenth Grade Details */}
+              <div className="bg-card shadow rounded-lg p-6">
+                <h3 className="text-lg font-semibold">10th Grade</h3>
+                <ul className="list-disc list-inside">
+                  <li>
+                    <strong>Board:</strong> {studentData.tenthBoardName}
+                  </li>
+                  <li>
+                    <strong>Year of Passing:</strong>{" "}
+                    {studentData.tenthYearOfPass}
+                  </li>
+                  <li>
+                    <strong>Medium:</strong> {studentData.tenthMedium}
+                  </li>
+                  <li>
+                    <strong>Max Marks:</strong> {studentData.tenthMaxMarks}
+                  </li>
+                  <li>
+                    <strong>Marks Obtained:</strong>{" "}
+                    {studentData.tenthMarksObtained}
+                  </li>
+                  <li>
+                    <strong>Percentage:</strong> {studentData.tenthPercentage}%
+                  </li>
+                </ul>
               </div>
+
+              {/* Twelfth Grade Details */}
+              <div className="bg-card shadow rounded-lg p-6">
+                <h3 className="text-lg font-semibold">12th Grade</h3>
+                <ul className="list-disc list-inside">
+                  <li>
+                    <strong>Board:</strong> {studentData.twelfthBoardName}
+                  </li>
+                  <li>
+                    <strong>Year of Passing:</strong>{" "}
+                    {studentData.twelfthYearOfPass}
+                  </li>
+                  <li>
+                    <strong>Medium:</strong> {studentData.twelfthMedium}
+                  </li>
+                  <li>
+                    <strong>Max Marks:</strong> {studentData.twelfthMaxMarks}
+                  </li>
+                  <li>
+                    <strong>Marks Obtained:</strong>{" "}
+                    {studentData.twelfthMarksObtained}
+                  </li>
+                  <li>
+                    <strong>Percentage:</strong> {studentData.twelfthPercentage}
+                    %
+                  </li>
+                </ul>
+              </div>
+
+              {/* College Details */}
+              <div className="bg-card shadow rounded-lg p-6">
+                <h3 className="text-lg font-semibold">College Details</h3>
+                <ul className="list-disc list-inside">
+                  <li>
+                    <strong>University Roll No:</strong>{" "}
+                    {studentData.universityRollNo}
+                  </li>
+                  <li>
+                    <strong>Registration No:</strong> {studentData.regNo}
+                  </li>
+                  <li>
+                    <strong>Branch:</strong> {studentData.branch}
+                  </li>
+                  <li>
+                    <strong>Section:</strong> {studentData.section}
+                  </li>
+                  <li>
+                    <strong>Status:</strong> {studentData.status}
+                  </li>
+                  <li>
+                    <strong>College:</strong> {studentData.college}
+                  </li>
+                </ul>
+              </div>
+
+              {/* Semester Details */}
+              {Array.from({ length: 8 }, (_, index) => (
+                <div className="bg-card shadow rounded-lg p-6" key={index}>
+                  <h3 className="text-lg font-semibold">
+                    Semester {index + 1}
+                  </h3>
+                  <ul className="list-disc list-inside">
+                    <li>
+                      <strong>Marks:</strong>{" "}
+                      {studentData[`sem${index + 1}Marks`] || "N/A"}
+                    </li>
+                    <li>
+                      <strong>Percentage:</strong>{" "}
+                      {studentData[`sem${index + 1}Percentage`] || "N/A"}%
+                    </li>
+                    <li>
+                      <strong>Backlogs:</strong>{" "}
+                      {studentData[`sem${index + 1}Backlogs`] || "N/A"}
+                    </li>
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
         </div>

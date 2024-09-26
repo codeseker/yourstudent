@@ -3,6 +3,23 @@ import * as XLSX from "xlsx";
 import { addDataToDb } from "@/app/lib/firebaseFunctions";
 import cache from "@/app/lib/cache";
 
+interface ExcelRow {
+  [key: string]: any;
+}
+
+interface WorksheetData {
+  sheetName: string;
+  data: ExcelRow[];
+}
+
+const formatDate = (serial: number): string => {
+  const date = XLSX.SSF.parse_date_code(serial);
+  return `${String(date.d).padStart(2, "0")}-${String(date.m).padStart(
+    2,
+    "0"
+  )}-${String(date.y).slice(-2)}`;
+};
+
 export async function POST(req: NextRequest) {
   try {
     const data = await req.formData();
@@ -39,13 +56,29 @@ export async function POST(req: NextRequest) {
     const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
     // Extract data from each sheet
-    const worksheets = workbook.SheetNames.map((sheetName) => {
-      const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    const worksheets: WorksheetData[] = workbook.SheetNames.map((sheetName) => {
+      const sheetData: ExcelRow[] = XLSX.utils.sheet_to_json(
+        workbook.Sheets[sheetName],
+        {
+          raw: false,
+        }
+      );
+
+      const formattedData = sheetData.map((row) => {
+        Object.keys(row).forEach((key) => {
+          if (typeof row[key] === "number" && key.includes("DOB")) {
+            row[key] = formatDate(row[key]);
+          }
+        });
+        return row;
+      });
+
       return {
         sheetName,
-        data: sheetData,
+        data: formattedData,
       };
     });
+
     const excelData = worksheets[0].data;
 
     const reponse = await addDataToDb(batch, excelData);

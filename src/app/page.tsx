@@ -23,7 +23,7 @@ export default function Home() {
     return (
       <div className="p-4">
         <Skeleton className="h-10 w-1/4 mb-4" />
-        <Skeleton className="h-64 w-full" />
+        <Skeleton className="w-full h-full" />
       </div>
     );
   }
