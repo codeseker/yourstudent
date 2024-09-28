@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, ChangeEvent } from "react";
+import { useParams } from "next/navigation";
+import React, { useState, ChangeEvent, useEffect } from "react";
 
 interface User {
   id: number;
@@ -92,6 +93,9 @@ const ListUser: React.FC = () => {
       (filters.year === "" || user.year === filters.year)
     );
   });
+
+  const { name } = useParams();
+  console.log(decodeURIComponent(name[0]));
 
   return (
     <div className="flex min-h-screen bg-gray-50">

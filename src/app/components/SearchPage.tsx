@@ -1,8 +1,15 @@
+"use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import React from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 const SearchComponent: React.FC = () => {
+  const [query, setQuery] = useState<string>();
+  const router = useRouter();
+  const handleClick = async () => {
+    router.push(`/teacher/students/${query}`);
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center ">
       {/* Title Section */}
@@ -17,8 +24,12 @@ const SearchComponent: React.FC = () => {
           type="text"
           className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full hover:border-gray-300 focus:outline-none focus:border-red-500 transition-colors"
           placeholder="Search Students..."
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <Button className="text-1xl absolute top-1/2 rounded-2xl px-8 right-4 flex transform -translate-y-1/2">
+        <Button
+          onClick={handleClick}
+          className="text-1xl absolute top-1/2 rounded-2xl px-8 right-4 flex transform -translate-y-1/2"
+        >
           Search
         </Button>
       </div>

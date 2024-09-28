@@ -5,6 +5,9 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  query,
+  where,
+  DocumentData,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import NodeCache from "node-cache";
@@ -148,4 +151,52 @@ export async function getStudentCount(batchYear: string) {
   const studentsCollection = collection(db, `batches/${batchYear}/students`);
   const studentsSnapshot = await getDocs(studentsCollection);
   return studentsSnapshot.size;
+}
+
+interface Student {
+  id: string;
+  batch: string;
+  [key: string]: any; // To allow any other dynamic fields
+}
+
+export async function getAllStudents(name: string): Promise<Student[]> {
+  try {
+    const batchesRef = collection(db, "batches");
+    const batchDocs = await getDocs(batchesRef);
+
+    const batchYears: string[] = [];
+    const matchedStudents: Student[] = [];
+
+    batchDocs.forEach((doc) => {
+      batchYears.push(doc.id);
+    });
+
+    for (const batchYear of batchYears) {
+      const batchCollectionRef = collection(
+        db,
+        `batches/${batchYear}/students`
+      );
+
+      const q = query(
+        batchCollectionRef,
+        where("fullName", "==", name.toUpperCase())
+      );
+
+      const querySnapshot = await getDocs(q);
+
+      querySnapshot.forEach((doc) => {
+        const studentData = doc.data() as DocumentData;
+        matchedStudents.push({
+          id: doc.id,
+          batch: batchYear,
+          ...studentData,
+        });
+      });
+    }
+
+    return matchedStudents;
+  } catch (error) {
+    console.error("Error querying students:", error);
+    return [];
+  }
 }

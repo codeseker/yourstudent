@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import SearchComponent from "./components/SearchPage";
 import Navbar from "./components/Navbar";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton from Shadcn
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
-  const { data: session, status } = useSession(); // status for loading state
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -16,9 +16,8 @@ export default function Home() {
     if (session?.user?.email === process.env.NEXT_PUBLIC_HOD_SIR_EMAIL) {
       router.push("/admin/dashboard");
     }
-  }, [session]);
+  }, [session, router]);
 
-  // Check if the session is loading
   if (status === "loading") {
     return (
       <div className="p-4">
@@ -28,7 +27,6 @@ export default function Home() {
     );
   }
 
-  // Once session is loaded, return the main component
   return (
     <div>
       {session?.user ? (
