@@ -33,69 +33,65 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 
-export type Batches = {
-  year: string;
-  totalSections: number;
+// Data type for each student
+export type Section = {
+  sectionName: string;
+  studentCount: number;
 };
 
-export const columns: ColumnDef<Batches>[] = [
+// Define the columns for the table
+export const columns: ColumnDef<Section>[] = [
   {
-    accessorKey: "sno",
-    header: () => <div className="text-left">S No</div>,
-    cell: ({ row, table }) => {
-      const index = table.getSortedRowModel().rows.indexOf(row) + 1;
-
-      return <div className="text-left font-medium">{index}</div>;
-    },
-  },
-  {
-    accessorKey: "year",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="text-left px-0"
-        >
-          Batch
-          <CaretSortIcon className="h-4 w-4" />
-        </Button>
-      );
-    },
+    accessorKey: "sectionName",
+    header: () => <div className="text-left">Section</div>,
     cell: ({ row }) => (
-      <div className="font-bold text-left">{row.getValue("year")}</div>
+      <div className="font-medium">{row.getValue("sectionName")}</div>
     ),
   },
   {
-    accessorKey: "totalSections",
-    header: () => <div className="text-left">Total Sections</div>,
+    accessorKey: "studentCount",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        className="text-left px-0 w-20"
+      >
+        Students Count
+        <CaretSortIcon className="h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("totalSections"));
-
-      return <div className="text-left font-medium">{amount}</div>;
+      const value: string = row.getValue("studentCount");
+      return (
+        <div className="text-left capitalize font-semibold text-md">
+          {value}
+        </div>
+      );
     },
   },
+
   {
     id: "actions",
-    enableHiding: false,
-    header: () => <div className="text-left">Action</div>,
+    header: () => <div className="text-left">Actions</div>,
     cell: ({ row }) => {
-      const batch = row.original;
-
+      const section = row.getValue("sectionName");
+      const url = window.location.href;
+      console.log(url);
       return (
         <Button>
-          <Link href={`/admin/batch/${batch.year}`}>View Batch</Link>
+          <Link href={`${url}/${section}`}>View Details</Link>
         </Button>
       );
     },
   },
 ];
 
-interface BatchTableProps {
-  data: Batches[];
+// Main component
+interface StudentTableProps {
+  data: Section[];
 }
 
-export function BatchesData({ data }: BatchTableProps) {
+export function SectionDataTable({ data }: StudentTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -127,12 +123,14 @@ export function BatchesData({ data }: BatchTableProps) {
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter By Year..."
-          value={(table.getColumn("year")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("year")?.setFilterValue(event.target.value)
+          placeholder="Filter Sections..."
+          value={
+            (table.getColumn("sectionName")?.getFilterValue() as string) ?? ""
           }
-          className="max-w-sm mr-4"
+          onChange={(event) =>
+            table.getColumn("sectionName")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm "
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

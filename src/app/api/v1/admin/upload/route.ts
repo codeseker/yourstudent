@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     const file: File = data.get("file") as unknown as File;
     const batch: string = data.get("batch") as string;
+    const section: string = data.get("section") as string;
 
     if (!file) {
       return NextResponse.json(
@@ -41,9 +42,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!batch) {
+    if (!batch || !section) {
       return NextResponse.json(
-        { message: "No batch provided", success: false },
+        { message: "No data provided", success: false },
         { status: 400 }
       );
     }
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     const excelData = worksheets[0].data;
 
-    const reponse = await addDataToDb(batch, excelData);
+    const reponse = await addDataToDb(batch, section, excelData);
     if (!reponse) {
       return NextResponse.json(
         {

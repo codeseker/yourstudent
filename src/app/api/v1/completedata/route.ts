@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import cache from "@/app/lib/cache";
-import { getStudentCount } from "@/app/lib/firebaseFunctions";
-import firebaseData from "@/app/lib/firebaseData";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,7 +10,7 @@ export async function GET(req: NextRequest) {
     if (cachedData) {
       return NextResponse.json(
         {
-          message: "Years fetched from cache",
+          message: "Years and sections fetched from cache",
           success: true,
           years: cachedData,
         },
@@ -20,18 +18,24 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // If not cached, fetch from Firestore
+    // Fetch all batches from Firestore
     const batchesCollection = collection(db, "batches");
     const batchesSnapshot = await getDocs(batchesCollection);
+
+    // Fetch sections for each batch and count the total number of sections
     const allYears = await Promise.all(
-      batchesSnapshot.docs.map(async (doc) => {
-        const id = doc.data()[firebaseData.regNo];
-        const year = doc.id;
-        const studentCount = await getStudentCount(year);
+      batchesSnapshot.docs.map(async (batchDoc) => {
+        const year = batchDoc.id; // The batch year
+
+        // Reference the 'sections' subcollection under this batch
+        const sectionsCollection = collection(db, `batches/${year}/sections`);
+        const sectionsSnapshot = await getDocs(sectionsCollection);
+
+        const totalSections = sectionsSnapshot.size; // Number of sections
+
         return {
-          id: id,
-          year: year,
-          total: studentCount,
+          year: year, // Batch year
+          totalSections: totalSections, // Total number of sections in this batch
         };
       })
     );
@@ -41,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Years fetched successfully",
+        message: "Years and sections fetched successfully",
         success: true,
         years: allYears,
       },

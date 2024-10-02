@@ -10,28 +10,34 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
-import NodeCache from "node-cache";
+import cache from "@/app/lib/cache";
 import firebaseData, {
   mapResponseToFirebaseData,
 } from "@/app/lib/firebaseData";
 
 // Upload Data
-export async function addDataToDb(batch: string, excelData: any) {
-  const cache = new NodeCache({ stdTTL: 3600 });
-
+export async function addDataToDb(
+  batchYear: string,
+  sectionName: string,
+  excelData: any
+) {
   try {
     // Reference to the specific batch document
-    const batchDocRef = doc(db, "batches", batch);
+    const batchDocRef = doc(db, "batches", batchYear);
     await setDoc(batchDocRef, { created: true }, { merge: true });
 
-    // Loop through each student entry and store them in the students subcollection
+    // Reference to the sections subcollection under the batch document
+    const sectionDocRef = doc(collection(batchDocRef, "sections"), sectionName);
+    await setDoc(sectionDocRef, { created: true }, { merge: true });
+
+    // Loop through each student entry and store them in the students subcollection under the section
     for (const ele of excelData) {
       const mappedData = mapResponseToFirebaseData(ele);
 
-      // Add student to the "students" subcollection under the respective batch
+      // Add student to the "students" subcollection under the respective section
       const studentDocRef = doc(
-        collection(batchDocRef, "students"),
-        mappedData[firebaseData.regNo]
+        collection(sectionDocRef, "students"),
+        mappedData.regNo // Assuming regNo is a unique identifier for each student
       );
       await setDoc(studentDocRef, mappedData, { merge: true });
     }
@@ -40,11 +46,13 @@ export async function addDataToDb(batch: string, excelData: any) {
     cache.del("batches");
     return true;
   } catch (error) {
+    console.error("Error adding data to Firestore:", error);
     return false;
   }
 }
 
 // get Batch data
+
 export async function getBatchData(batch: string) {
   try {
     const batchDocRef = doc(db, "batches", batch);
@@ -56,28 +64,36 @@ export async function getBatchData(batch: string) {
       return { message: "Batch not found", success: false };
     }
 
-    const studentsCollectionRef = collection(batchDocRef, "students");
+    // Reference to the sections subcollection
+    const sectionsCollectionRef = collection(batchDocRef, "sections");
 
-    // Get all students in the batch
-    const studentsSnapshot = await getDocs(studentsCollectionRef);
+    // Get all sections in the batch
+    const sectionsSnapshot = await getDocs(sectionsCollectionRef);
 
-    // Extract name and regNo from each student's document
-    const studentsData = studentsSnapshot.docs.map((doc) => ({
-      id: doc.data()[firebaseData.regNo],
-      name: doc.data()[firebaseData.fullName],
-      regNo: doc.data()[firebaseData.regNo],
-      mobileNumber: doc.data()[firebaseData.mobileNumber],
-      section: doc.data()[firebaseData.section],
-      primaryEmailId: doc.data()[firebaseData.primaryEmailId],
-      cgpa: doc.data()[firebaseData.cgpa],
-    }));
+    const sectionsData = await Promise.all(
+      sectionsSnapshot.docs.map(async (sectionDoc) => {
+        const sectionName = sectionDoc.id;
 
-    // Return the batch data along with all students' information
+        // Reference to the students subcollection within the section
+        const studentsCollectionRef = collection(sectionDoc.ref, "students");
+
+        // Get all students in the section
+        const studentsSnapshot = await getDocs(studentsCollectionRef);
+
+        // Return section information along with the student count and data
+        return {
+          sectionName: sectionName,
+          studentCount: studentsSnapshot.size,
+        };
+      })
+    );
+
+    // Return the batch data along with all sections and their student counts
     return {
-      message: "Batch Data Fetched",
+      message: "Batch data fetched successfully",
       success: true,
       batch: batchDoc.id,
-      students: studentsData,
+      sections: sectionsData,
     };
   } catch (error: any) {
     return {
@@ -88,12 +104,51 @@ export async function getBatchData(batch: string) {
   }
 }
 
+// get section data
+export async function getSectionData(batchYear: string, sectionName: string) {
+  try {
+    // If not cached, fetch data from Firestore
+    const sectionRef = collection(
+      db,
+      "batches",
+      batchYear,
+      "sections",
+      sectionName,
+      "students"
+    );
+    const sectionSnapshot = await getDocs(sectionRef);
+
+    if (sectionSnapshot.empty) {
+      return { success: false, message: "No students found for this section" };
+    }
+
+    const students = sectionSnapshot.docs.map((doc) => ({
+      regNo: doc.data()[firebaseData.regNo],
+      name: doc.data()[firebaseData.fullName],
+      primaryEmail: doc.data()[firebaseData.primaryEmailId],
+      cgpa: doc.data()[firebaseData.cgpa],
+      section: doc.data()[firebaseData.section],
+      id: doc.data()[firebaseData.regNo],
+      mobileNumber: doc.data()[firebaseData.mobileNumber],
+    }));
+    return { success: true, message: "Section data fetched", students };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
+
 // get Student Details
-export async function getStudentDetail(batch: string, regNo: string) {
+export async function getStudentDetail(
+  batch: string,
+  section: string,
+  regNo: string
+) {
   try {
     const batchDocRef = doc(db, "batches", batch);
 
-    const studentDocRef = doc(batchDocRef, "students", regNo);
+    const sectionDocRef = doc(batchDocRef, "sections", section);
+
+    const studentDocRef = doc(sectionDocRef, "students", regNo);
 
     // Get the student's document
     const studentDoc = await getDoc(studentDocRef);

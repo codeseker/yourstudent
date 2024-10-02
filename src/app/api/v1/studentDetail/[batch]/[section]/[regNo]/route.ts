@@ -2,14 +2,12 @@ import { getStudentDetail } from "@/app/lib/firebaseFunctions";
 import { NextRequest, NextResponse } from "next/server";
 import cache from "@/app/lib/cache";
 
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { batch: string; section: string; regNo: string } }
+) {
+  const { batch, regNo, section } = params;
   const url = new URL(req.url);
-  const pathname = url.pathname;
-
-  // Use regex to extract batch and regNo
-  const match = pathname.match(/\/studentDetail\/(\d+)\/(.+)/);
-  const batch = match ? match[1] : null;
-  const regNo = match ? match[2] : null;
 
   if (!batch || !regNo) {
     return NextResponse.json(
@@ -22,7 +20,7 @@ export async function GET(req: NextRequest) {
   if (cachedData) {
     return NextResponse.json(cachedData, { status: 200 });
   }
-  const response = await getStudentDetail(batch, regNo);
+  const response = await getStudentDetail(batch, section, regNo);
   if (!response.success) {
     return NextResponse.json(response, { status: 500 });
   }

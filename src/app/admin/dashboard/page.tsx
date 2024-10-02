@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import { BatchesData } from "@/app/components/BatchTable";
 import { Button } from "@/components/ui/button";
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
+import Link from "next/link";
 
 interface YearData {
-  id: string;
   year: string;
-  total: number;
+  totalSections: number;
 }
 
 interface BatchesData {
@@ -55,11 +55,8 @@ function AdminDashboard() {
 
           <div className="flex-grow p-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full">
-              <Button
-                onClick={() => (window.location.href = "/admin/upload")}
-                className="p-2 px-4 rounded-lg w-full md:w-auto"
-              >
-                + Add New Student
+              <Button className="p-2 px-4 rounded-lg w-full md:w-auto">
+                <Link href="/admin/upload">+ Add New Student</Link>
               </Button>
             </div>
 

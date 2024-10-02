@@ -79,7 +79,7 @@ type StudentResponse = {
 
 const StudentDetail = () => {
   const [student, setStudent] = useState<StudentData | undefined>(undefined);
-  const { year, regNo } = useParams();
+  const { year, regNo, section } = useParams();
 
   useEffect(() => {
     const fetchBatchData = async () => {
@@ -98,7 +98,7 @@ const StudentDetail = () => {
   const getStudentData = async () => {
     try {
       const { data } = await axios.get(
-        `/api/v1/studentDetail/${year}/${regNo}`
+        `/api/v1/studentDetail/${year}/${section}/${regNo}`
       );
       return data;
     } catch (error: any) {

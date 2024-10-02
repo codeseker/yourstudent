@@ -1,9 +1,13 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 
 function UploadBatch() {
-  const [batchName, setBatchName] = useState<string>("");
+  const [batchYear, setBatchYear] = useState<string>("");
+  const [sectionName, setSectionName] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -11,17 +15,31 @@ function UploadBatch() {
     }
   };
 
-  const handleBatchNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setBatchName(event.target.value);
+  const handleBatchYearChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setBatchYear(event.target.value);
+  };
+
+  const handleSectionNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSectionName(event.target.value);
   };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    if (batchName && file) {
-      console.log("Batch Name:", batchName);
+    if (batchYear && sectionName && file) {
+      setIsSubmitting(true);
+      console.log("Batch Year:", batchYear);
+      console.log("Section Name:", sectionName);
       console.log("Selected File:", file);
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setBatchYear("");
+        setSectionName("");
+        setFile(null);
+        alert("Batch data uploaded successfully!");
+      }, 1000);
     } else {
-      alert("Please provide a batch name and upload a file.");
+      alert("Please provide all required fields.");
     }
   };
 
@@ -32,35 +50,46 @@ function UploadBatch() {
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-gray-600 font-medium mb-2">
-            Batch Name:
-          </label>
-          <input
+          <label className="block  font-medium mb-2">Batch Year:</label>
+          <Input
             type="text"
-            value={batchName}
-            onChange={handleBatchNameChange}
-            placeholder="Enter Batch Name"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-green-200 focus:border-green-500"
+            value={batchYear}
+            onChange={handleBatchYearChange}
+            placeholder="Enter Batch Year"
+            className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
         <div>
-          <label className="block text-gray-600 font-medium mb-2">
-            Upload File:
+          <label className="block font-medium mb-2">
+            Section Name:{" "}
+            <span className="text-gray-700">Just Write A instead CS-A</span>
           </label>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring focus:ring-green-200 focus:border-green-500"
+          <Input
+            type="text"
+            value={sectionName}
+            onChange={handleSectionNameChange}
+            placeholder="Enter Section Name"
+            className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
-        <button
+        <div>
+          <label className="block  font-medium mb-2">Upload File:</label>
+          <Input
+            type="file"
+            onChange={handleFileChange}
+            className="w-full px-4 py-2 border rounded-md"
+            required
+          />
+        </div>
+        <Button
           type="submit"
-          className="w-full py-2 px-4 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition-colors"
+          className="w-full py-2 px-4 font-semibold rounded-md"
+          disabled={isSubmitting}
         >
-          Submit
-        </button>
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </Button>
       </form>
     </div>
   );

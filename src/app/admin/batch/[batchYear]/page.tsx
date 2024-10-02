@@ -2,34 +2,28 @@
 
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import Sidebar from "@/app/components/Sidebar";
-import { StudentDataTable } from "@/app/components/StudentData";
+import { SectionDataTable } from "@/app/components/SectionDataTable";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-interface Student {
-  id: string;
-  image: string;
-  name: string;
-  regNo: string;
-  mobileNumber: string;
-  section: string;
-  primaryEmailId: string;
-  cgpa: string | number;
+interface Section {
+  sectionName: string;
+  studentCount: number;
 }
 
 interface BatchResponse {
   message: string;
   success: boolean;
   batch: string;
-  students: Student[];
+  sections: Section[];
 }
 
 function BatchDetail() {
   const { batchYear } = useParams();
-  const [students, setStudents] = useState<Student[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -38,9 +32,10 @@ function BatchDetail() {
         const batchData: BatchResponse = await getBatchData();
 
         if (!batchData.success) {
+          toast("Error fetching batch data");
         } else {
-          setStudents(batchData.students);
-          toast("Batch data Fetched");
+          setSections(batchData.sections);
+          toast("Batch data fetched successfully");
         }
       } catch (error) {
         toast("Error loading data");
@@ -61,9 +56,14 @@ function BatchDetail() {
         success: false,
         message:
           error.response?.data?.message || "An unexpected error occurred",
-        students: [],
+        sections: [],
       };
     }
+  };
+
+  const handleSectionClick = (sectionName: string) => {
+    // Navigate to section details (or you can load students in this component)
+    window.location.href = `/admin/batch/${batchYear}/${sectionName}`;
   };
 
   return (
@@ -86,7 +86,7 @@ function BatchDetail() {
               </Button>
             </div>
 
-            <StudentDataTable data={students} />
+            <SectionDataTable data={sections} />
           </div>
         </div>
       )}

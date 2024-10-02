@@ -32,17 +32,17 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 // Data type for each student
 export type Student = {
-  id: string;
-  image: string;
   regNo: string;
   name: string;
-  mobileNumber: string;
-  section: string;
-  primaryEmailId: string;
+  primaryEmail: string;
   cgpa: string | number;
+  section: string;
+  id: string;
+  mobileNumber: string;
 };
 
 // Define the columns for the table
@@ -86,6 +86,13 @@ export const columns: ColumnDef<Student>[] = [
     },
   },
   {
+    accessorKey: "primaryEmail",
+    header: () => <div className="text-left">Email Id</div>,
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("primaryEmail")}</div>
+    ),
+  },
+  {
     accessorKey: "mobileNumber",
     header: () => <div className="text-left">Phone No</div>,
     cell: ({ row }) => (
@@ -115,14 +122,15 @@ export const columns: ColumnDef<Student>[] = [
     header: () => <div className="text-left">Actions</div>,
     cell: ({ row }) => {
       const student = row.original;
-      const year = student.primaryEmailId.substring(0, 4);
+      const year = student.primaryEmail.substring(0, 4);
+      const section = student.section.charAt(3);
       return (
-        <Button
-          onClick={() =>
-            (window.location.href = `/admin/studentdetail/${year}/${student.regNo}`)
-          }
-        >
-          View Details
+        <Button>
+          <Link
+            href={`/admin/studentdetail/${year}/${section}/${student.regNo}`}
+          >
+            View Details
+          </Link>
         </Button>
       );
     },
