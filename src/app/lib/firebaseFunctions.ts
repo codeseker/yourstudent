@@ -255,3 +255,75 @@ export async function getAllStudents(name: string): Promise<Student[]> {
     return [];
   }
 }
+
+export async function getAllSections(batch: string) {
+  try {
+    const sectionsCollectionRef = collection(db, `batches/${batch}/sections`);
+    const querySnapshot = await getDocs(sectionsCollectionRef);
+
+    const sections = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return sections;
+  } catch (error) {
+    console.error("Error fetching sections: ", error);
+    return [];
+  }
+}
+
+export async function assignTeacher(
+  batch: string,
+  section: string,
+  teacher: string
+) {
+  try {
+    // Reference to the teacher's document
+    const teacherDocRef = doc(db, "teachers", teacher);
+    const teacherDoc = await getDoc(teacherDocRef);
+
+    if (teacherDoc.exists()) {
+      // If the teacher already exists, update the assigned batches
+      const currentBatches = teacherDoc.data()?.assigned_batches || [];
+
+      // Check if the batch already exists in the array
+      const batchIndex = currentBatches.findIndex(
+        (b: any) => b.batch === batch
+      );
+
+      if (batchIndex > -1) {
+        // If the batch exists, update the sections array
+        const sections = currentBatches[batchIndex].sections;
+        if (!sections.includes(section)) {
+          sections.push(section);
+        }
+      } else {
+        // If the batch doesn't exist, add a new entry
+        currentBatches.push({ batch, sections: [section] });
+      }
+
+      // Update the teacher's document with the modified batch info
+      await updateDoc(teacherDocRef, { assigned_batches: currentBatches });
+    } else {
+      // If the teacher doesn't exist, create a new document
+      const newTeacherData = {
+        email: teacher, // Replace this with actual email
+        role: "Teacher",
+        assigned_batches: [{ batch, sections: [section] }],
+      };
+
+      await setDoc(teacherDocRef, newTeacherData);
+    }
+
+    return {
+      message: "Teacher Assigned Succesfully",
+      success: true,
+    };
+  } catch (error) {
+    return {
+      message: "Error assigning teacher",
+      success: false,
+    };
+  }
+}

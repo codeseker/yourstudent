@@ -56,7 +56,7 @@ function AdminDashboard() {
           <div className="flex-grow p-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full">
               <Button className="p-2 px-4 rounded-lg w-full md:w-auto">
-                <Link href="/admin/upload">+ Add New Student</Link>
+                <Link href="/admin/upload">+ Add New Batch</Link>
               </Button>
             </div>
 

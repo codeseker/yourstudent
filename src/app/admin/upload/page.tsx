@@ -1,7 +1,17 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import axios from "axios";
+import Link from "next/link";
 import React, { useState, ChangeEvent, FormEvent } from "react";
+import { toast } from "sonner";
+import { FaSpinner } from "react-icons/fa";
+
+interface DocumentResponse {
+  success: boolean;
+  message: string;
+}
 
 function UploadBatch() {
   const [batchYear, setBatchYear] = useState<string>("");
@@ -23,21 +33,38 @@ function UploadBatch() {
     setSectionName(event.target.value);
   };
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (batchYear && sectionName && file) {
-      setIsSubmitting(true);
-      console.log("Batch Year:", batchYear);
-      console.log("Section Name:", sectionName);
-      console.log("Selected File:", file);
+      const formData: FormData = new FormData();
 
-      setTimeout(() => {
-        setIsSubmitting(false);
+      formData.append("batch", batchYear);
+      formData.append("section", sectionName);
+      formData.append("file", file);
+
+      setIsSubmitting(true);
+
+      try {
+        const { data }: { data: DocumentResponse } = await axios.post(
+          "/api/v1/admin/upload",
+          formData
+        );
+
+        if (!data.success) {
+          toast(data.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        toast(data.message);
         setBatchYear("");
         setSectionName("");
         setFile(null);
-        alert("Batch data uploaded successfully!");
-      }, 1000);
+      } catch (error) {
+        toast("Error occurred while uploading.");
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       alert("Please provide all required fields.");
     }
@@ -45,12 +72,13 @@ function UploadBatch() {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-lg bg-white">
-      <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">
+      <h2 className="text-2xl font-semibold text-center mb-6">
         Upload Batch Data
       </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block  font-medium mb-2">Batch Year:</label>
+          <label className="block font-medium mb-2">Batch Year:</label>
           <Input
             type="text"
             value={batchYear}
@@ -75,7 +103,7 @@ function UploadBatch() {
           />
         </div>
         <div>
-          <label className="block  font-medium mb-2">Upload File:</label>
+          <label className="block font-medium mb-2">Upload File:</label>
           <Input
             type="file"
             onChange={handleFileChange}
@@ -85,12 +113,25 @@ function UploadBatch() {
         </div>
         <Button
           type="submit"
-          className="w-full py-2 px-4 font-semibold rounded-md"
+          className="w-full py-2 px-4 font-semibold rounded-md mt-4 flex justify-center items-center"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "Submit"}
+          {isSubmitting ? (
+            <FaSpinner className="animate-spin mr-2" />
+          ) : (
+            "Upload"
+          )}
         </Button>
       </form>
+
+      <Separator className="my-4" />
+      <div className="flex justify-center items-center">
+        <Button>
+          <a href={"/assets/dummydata.xlsx"} download={"dummydata.xlsx"}>
+            Download Sample Excel
+          </a>
+        </Button>
+      </div>
     </div>
   );
 }
