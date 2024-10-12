@@ -327,3 +327,15 @@ export async function assignTeacher(
     };
   }
 }
+
+export async function allAssignedTeachers() {
+  const teachersRef = collection(db, "teachers");
+  const querySnapshot = await getDocs(teachersRef);
+  const teachers = querySnapshot.docs.map((doc) => doc.data());
+
+  if (teachers) {
+    return { success: true, teachers };
+  } else {
+    return { success: false };
+  }
+}

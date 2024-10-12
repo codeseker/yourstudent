@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import axios from "axios";
 import { toast } from "sonner";
-import { AiOutlineLoading3Quarters } from "react-icons/ai"; // Importing spinner icon
 import Loader from "./Loader";
 
 interface Assignment {
