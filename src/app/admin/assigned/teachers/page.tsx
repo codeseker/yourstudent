@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
 import AssignedTeachersTable from "@/app/components/AssignedTeacherTable";
+import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 
 interface Section {
   batch: string;
@@ -40,11 +41,16 @@ function AssignedTeachers() {
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div>
+        <AdminPanelSkeleton />
+      </div>
+    );
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row ">
       <div className="border-r shadow-lg">
         <Sidebar />
       </div>

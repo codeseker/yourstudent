@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   useReactTable,
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  ColumnFiltersState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -65,14 +67,27 @@ const columns: ColumnDef<Teacher>[] = [
 ];
 
 const AssignedTeachersTable: React.FC<BatchesDataProps> = ({ data }) => {
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [emailFilter, setEmailFilter] = useState(""); // State to store the email filter input
+
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]); // Column filter state
 
   // Initialize the react-table instance
   const table = useReactTable({
     data,
     columns,
+    state: {
+      columnFilters, // Attach the filter state
+    },
+    onColumnFiltersChange: setColumnFilters, // Sync column filter changes with state
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(), // Enable filtering
   });
+
+  // Update the email filter value when the input changes
+  const handleEmailFilterChange = (value: string) => {
+    setEmailFilter(value);
+    table.getColumn("email")?.setFilterValue(value); // Set the filter for the "email" column
+  };
 
   return (
     <div>
@@ -80,8 +95,8 @@ const AssignedTeachersTable: React.FC<BatchesDataProps> = ({ data }) => {
       <div className="flex items-center py-4">
         <Input
           placeholder="Filter by email..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          value={emailFilter}
+          onChange={(event) => handleEmailFilterChange(event.target.value)}
           className="max-w-sm mr-4"
         />
       </div>
