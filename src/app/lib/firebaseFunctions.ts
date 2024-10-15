@@ -5,6 +5,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  arrayUnion,
   query,
   where,
   DocumentData,
@@ -214,48 +215,6 @@ interface Student {
   [key: string]: any; // To allow any other dynamic fields
 }
 
-export async function getAllStudents(name: string): Promise<Student[]> {
-  try {
-    const batchesRef = collection(db, "batches");
-    const batchDocs = await getDocs(batchesRef);
-
-    const batchYears: string[] = [];
-    const matchedStudents: Student[] = [];
-
-    batchDocs.forEach((doc) => {
-      batchYears.push(doc.id);
-    });
-
-    for (const batchYear of batchYears) {
-      const batchCollectionRef = collection(
-        db,
-        `batches/${batchYear}/students`
-      );
-
-      const q = query(
-        batchCollectionRef,
-        where("fullName", "==", name.toUpperCase())
-      );
-
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach((doc) => {
-        const studentData = doc.data() as DocumentData;
-        matchedStudents.push({
-          id: doc.id,
-          batch: batchYear,
-          ...studentData,
-        });
-      });
-    }
-
-    return matchedStudents;
-  } catch (error) {
-    console.error("Error querying students:", error);
-    return [];
-  }
-}
-
 export async function getAllSections(batch: string) {
   try {
     const sectionsCollectionRef = collection(db, `batches/${batch}/sections`);
@@ -337,5 +296,50 @@ export async function allAssignedTeachers() {
     return { success: true, teachers };
   } else {
     return { success: false };
+  }
+}
+
+export async function getAllStudents(batch: string, section: string) {
+  try {
+    const sectionsCollectionRef = collection(
+      db,
+      `batches/${batch}/sections/${section}/students`
+    );
+    const querySnapshot = await getDocs(sectionsCollectionRef);
+
+    const students = querySnapshot.docs.map((doc) => ({
+      regNo: doc.id,
+    }));
+
+    return { students, success: true };
+  } catch (error) {
+    console.error("Error fetching sections: ", error);
+    return { students: [], success: false };
+  }
+}
+
+export async function uploadMarks(
+  batch: string,
+  section: string,
+  regNo: string,
+  semester: string,
+  subject: string,
+  assignment: string,
+  marks: string
+) {
+  const studentRef = doc(
+    db,
+    `batches/${batch}/sections/${section}/students/${regNo}`
+  );
+  const newAssignment = { assignment: assignment, marks };
+
+  try {
+    await updateDoc(studentRef, {
+      [`assignments.${semester}.${subject}`]: arrayUnion(newAssignment),
+    });
+
+    return { message: "Assignment marks added successfully!", success: true };
+  } catch (error) {
+    return { message: "Error! Failed to upload marks", success: false };
   }
 }
