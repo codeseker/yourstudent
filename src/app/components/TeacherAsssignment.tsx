@@ -52,7 +52,7 @@ const TeacherAssignment: React.FC = () => {
   const [assignedTeachers, setAssignedTeachers] = useState<Assignment[]>([]);
   const [batches, setBatches] = useState<SingleYear[]>([]);
   const [sections, setSections] = useState<SingleSection[]>([]);
-  const [loading, setLoading] = useState<boolean>(false); // Loading state
+  const [loading, setLoading] = useState<boolean>(false);
   const teachers: string[] = [
     "vivek.saxena@poornima.org",
     "abhishekdhadich@poornima.org",
@@ -108,21 +108,18 @@ const TeacherAssignment: React.FC = () => {
         );
 
         if (!data.success) {
-          toast(data.message);
+          toast.error(data.message);
         } else {
-          toast(data.message);
+          toast.success(data.message);
         }
-        setSelectedBatch("");
-        setSelectedSection("");
-        setSelectedTeacher("");
       } catch (error) {
-        toast("Failed to assign teacher. Please try again.");
+        toast.error("Failed to assign teacher. Please try again.");
         console.error("Error assigning teacher:", error);
       } finally {
         setLoading(false); // Stop loading after the API call is done
       }
     } else {
-      console.log("Please select all the fields");
+      toast.error("Please select all the fields");
     }
   };
 
