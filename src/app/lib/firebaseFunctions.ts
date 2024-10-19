@@ -343,3 +343,33 @@ export async function uploadMarks(
     return { message: "Error! Failed to upload marks", success: false };
   }
 }
+
+export async function getTeacherBatches(email: string) {
+  try {
+    // Reference to the teacher's document using their email
+    const teacherDocRef = doc(db, "teachers", email);
+
+    // Fetch the document from Firestore
+    const docSnap = await getDoc(teacherDocRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const assignedBatches = data.assigned_batches || [];
+
+      return {
+        success: true,
+        batches: assignedBatches,
+      };
+    } else {
+      return {
+        success: false,
+        batches: [],
+      };
+    }
+  } catch (error: any) {
+    return {
+      batches: [],
+      success: false,
+    };
+  }
+}

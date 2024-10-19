@@ -58,6 +58,7 @@ const TeacherAssignment: React.FC = () => {
     "abhishekdhadich@poornima.org",
     "anilkumar@poornima.org",
     "shikhagautam@poornima.org",
+    "hp659818@gmail.com",
   ];
 
   // Fetch batches from API

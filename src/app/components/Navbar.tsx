@@ -1,9 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import React from "react";
+import { LogOut, RectangleEllipsis } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Header: React.FC = () => {
+  const router = useRouter();
+  const session = useSession();
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: true, callbackUrl: "/" });
@@ -30,23 +34,23 @@ const Header: React.FC = () => {
           <span className="ml-3 text-xl">YourStudent</span>
         </a>
 
-        <Button
-          onClick={() => handleSignOut()}
-          className="inline-flex items-center border-0 py-1 px-3 focus:outline-none rounded text-base mt-4 md:mt-0"
-        >
-          Logout
-          <svg
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            className="w-4 h-4 ml-1"
-            viewBox="0 0 24 24"
+        <div>
+          <Button
+            onClick={() => {
+              if (
+                session.data?.user?.email ===
+                process.env.NEXT_PUBLIC_HOD_SIR_EMAIL
+              ) {
+                router.push("/admin/dashboard");
+              } else {
+                router.push("/teacher/dashboard");
+              }
+            }}
+            className="mx-4 inline-flex items-center justify-center gap-2 py-2 px-4 text-white rounded-lg shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 text-sm md:text-base mt-4 md:mt-0"
           >
-            <path d="M5 12h14M12 5l7 7-7 7"></path>
-          </svg>
-        </Button>
+            Dashboard
+          </Button>
+        </div>
       </div>
     </header>
   );
