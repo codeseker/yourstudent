@@ -1,19 +1,11 @@
 "use client";
-import Sidebar from "@/app/components/Sidebar";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "sonner"; // For notifications
-import { BatchesData } from "@/app/components/BatchTable"; // Component to display batch data
-import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { BatchesData } from "@/app/components/BatchTable";
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
-import Link from "next/link";
 import TeacherSidebar from "@/app/components/TeacherSidebar";
 import { useSession } from "next-auth/react";
-
-interface Batch {
-  batch: string;
-  sections: string[];
-}
 
 interface YearData {
   year: string;
@@ -21,9 +13,9 @@ interface YearData {
 }
 
 function TeacherDashboard() {
-  const { data: session } = useSession(); // Get teacher's email from session
+  const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
-  const [year, setYear] = useState<YearData[]>([]); // Store batches by year
+  const [year, setYear] = useState<YearData[]>([]);
 
   useEffect(() => {
     const fetchBatches = async () => {
@@ -74,7 +66,7 @@ function TeacherDashboard() {
           </div>
 
           <div className="flex-grow p-6">
-            <BatchesData data={year} />
+            <BatchesData data={year} userRole="teacher" />
           </div>
         </div>
       )}

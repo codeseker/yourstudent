@@ -61,7 +61,7 @@ function AdminDashboard() {
               </Button>
             </div>
 
-            <BatchesData data={year} />
+            <BatchesData data={year} userRole="admin" />
           </div>
         </div>
       )}

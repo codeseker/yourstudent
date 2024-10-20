@@ -1,12 +1,10 @@
 "use client";
-
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
-import Sidebar from "@/app/components/Sidebar";
 import { StudentDataTable } from "@/app/components/StudentData";
-import { Button } from "@/components/ui/button";
+import TeacherSidebar from "@/app/components/TeacherSidebar";
 import axios from "axios";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Student {
@@ -25,8 +23,8 @@ interface SectionResponse {
   students: Student[];
 }
 
-function BatchDetail() {
-  const { batchYear, section } = useParams();
+function TeacherSectionData() {
+  const { year, section } = useParams();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -49,12 +47,12 @@ function BatchDetail() {
     };
 
     fetchSectionData();
-  }, [batchYear, section]);
+  }, [year, section]);
 
   const getSectionData = async () => {
     try {
       const { data } = await axios.get(
-        `/api/v1/admin/batch/${batchYear}/${section}`
+        `/api/v1/teacher/batch/${year}/${section}`
       );
       return data;
     } catch (error: any) {
@@ -66,7 +64,6 @@ function BatchDetail() {
       };
     }
   };
-
   return (
     <div>
       {loading ? (
@@ -74,13 +71,11 @@ function BatchDetail() {
       ) : (
         <div className="min-h-screen flex flex-col md:flex-row dark:bg-background">
           <div className="border-r shadow">
-            <Sidebar />
+            <TeacherSidebar />
           </div>
 
           <div className="flex-grow p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 w-full"></div>
-
-            <StudentDataTable data={students} userRole="admin" />
+            <StudentDataTable data={students} userRole="teacher" />
           </div>
         </div>
       )}
@@ -88,4 +83,4 @@ function BatchDetail() {
   );
 }
 
-export default BatchDetail;
+export default TeacherSectionData;

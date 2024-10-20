@@ -38,6 +38,8 @@ export type Batches = {
   totalSections: number;
 };
 
+let role: string;
+
 export const columns: ColumnDef<Batches>[] = [
   {
     accessorKey: "sno",
@@ -84,7 +86,7 @@ export const columns: ColumnDef<Batches>[] = [
 
       return (
         <Button>
-          <Link href={`/admin/batch/${batch.year}`}>View Batch</Link>
+          <Link href={`/${role}/batch/${batch.year}`}>View Batch</Link>
         </Button>
       );
     },
@@ -93,9 +95,11 @@ export const columns: ColumnDef<Batches>[] = [
 
 interface BatchTableProps {
   data: Batches[];
+  userRole: string;
 }
 
-export function BatchesData({ data }: BatchTableProps) {
+export function BatchesData({ data, userRole }: BatchTableProps) {
+  role = userRole;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []

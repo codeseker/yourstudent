@@ -4,6 +4,13 @@ import Link from "next/link";
 import React from "react";
 
 function TeacherSidebar() {
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: true, callbackUrl: "/" });
+    } catch (error) {
+      console.error("Error during sign out:", error);
+    }
+  };
   return (
     <aside
       className={`bg-card h-full rounded w-full md:w-64 p-4 absolute sm:relative transition-transform transform ${
@@ -20,7 +27,10 @@ function TeacherSidebar() {
             <Link href="/teacher/student/assignment">Assignment Marks</Link>
           </li>
         </ul>
-        <button className="w-full flex items-start p-4 hover:bg-accent">
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-start p-4 hover:bg-accent"
+        >
           Sign Out
         </button>
       </nav>

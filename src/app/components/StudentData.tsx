@@ -45,6 +45,8 @@ export type Student = {
   mobileNumber: string;
 };
 
+let role: string;
+
 // Define the columns for the table
 export const columns: ColumnDef<Student>[] = [
   {
@@ -127,7 +129,7 @@ export const columns: ColumnDef<Student>[] = [
       return (
         <Button>
           <Link
-            href={`/admin/studentdetail/${year}/${section}/${student.regNo}`}
+            href={`/${role}/studentdetail/${year}/${section}/${student.regNo}`}
           >
             View Details
           </Link>
@@ -140,9 +142,11 @@ export const columns: ColumnDef<Student>[] = [
 // Main component
 interface StudentTableProps {
   data: Student[];
+  userRole: string;
 }
 
-export function StudentDataTable({ data }: StudentTableProps) {
+export function StudentDataTable({ data, userRole }: StudentTableProps) {
+  role = userRole;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
