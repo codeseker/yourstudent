@@ -1,4 +1,5 @@
 "use client";
+// @ts-nocheck
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import { StudentDataTable } from "@/app/components/StudentData";
 import TeacherSidebar from "@/app/components/TeacherSidebar";

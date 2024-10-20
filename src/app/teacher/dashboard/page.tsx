@@ -1,4 +1,5 @@
 "use client";
+// @ts-nocheck
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";

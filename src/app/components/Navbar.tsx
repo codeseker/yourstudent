@@ -1,20 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import React from "react";
-import { LogOut, RectangleEllipsis } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Header: React.FC = () => {
   const router = useRouter();
   const session = useSession();
-  const handleSignOut = async () => {
-    try {
-      await signOut({ redirect: true, callbackUrl: "/" });
-    } catch (error) {
-      console.error("Error during sign out:", error);
-    }
-  };
   return (
     <header className="text-gray-600 body-font shadow-lg sticky top-0 z-50 bg-white">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center justify-between">

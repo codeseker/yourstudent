@@ -100,9 +100,19 @@ export async function POST(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
+    let errorMessage = "An unexpected error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
-      { message: "Internal Server Error", success: false },
+      {
+        message: "Internal Server Error",
+        success: false,
+        error: errorMessage,
+      },
       { status: 500 }
     );
   }

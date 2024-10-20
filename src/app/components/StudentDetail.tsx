@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import React from "react";
 
 type StudentData = {
@@ -83,7 +84,7 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
           <div className="col-span-1 sm:col-span-1">
             <div className="bg-card shadow rounded-lg p-6">
               <div className="flex flex-col items-center">
-                <img
+                <Image
                   src="https://randomuser.me/api/portraits/men/94.jpg"
                   className="w-32 h-32 bg-gray-300 rounded-full mb-4"
                   alt="Profile"
@@ -91,12 +92,7 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                 <h1 className="text-xl font-bold">{studentData.fullName}</h1>
                 <p className="text-gray-700">{studentData.branch}</p>
                 <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                  <Button
-                    // href={`mailto:${studentData.primaryEmailId}`}
-                    className="py-2 px-4 rounded"
-                  >
-                    Edit Contact
-                  </Button>
+                  <Button className="py-2 px-4 rounded">Edit Contact</Button>
                 </div>
               </div>
               <hr className="my-6 border-t border-gray-300" />
@@ -108,10 +104,12 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                 </span>
                 <ul>
                   <li className="mb-2">
-                    <strong>Father's Name:</strong> {studentData.fatherName}
+                    <strong>Father&apos;s Name:</strong>{" "}
+                    {studentData.fatherName}
                   </li>
                   <li className="mb-2">
-                    <strong>Mother's Name:</strong> {studentData.motherName}
+                    <strong>Mother&apos;s Name:</strong>{" "}
+                    {studentData.motherName}
                   </li>
                   <li className="mb-2">
                     <strong>Date of Birth:</strong> {studentData.dob}
@@ -123,7 +121,7 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                     <strong>Mobile Number:</strong> {studentData.mobileNumber}
                   </li>
                   <li className="mb-2">
-                    <strong>Father's Mobile:</strong>{" "}
+                    <strong>Father&apos;s Mobile:</strong>{" "}
                     {studentData.fatherMobileNo}
                   </li>
                   <li className="mb-2">
@@ -198,32 +196,6 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                   <li>
                     <strong>Percentage:</strong> {studentData.twelfthPercentage}
                     %
-                  </li>
-                </ul>
-              </div>
-
-              {/* College Details */}
-              <div className="bg-card shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold">College Details</h3>
-                <ul className="list-disc list-inside">
-                  <li>
-                    <strong>University Roll No:</strong>{" "}
-                    {studentData.universityRollNo}
-                  </li>
-                  <li>
-                    <strong>Registration No:</strong> {studentData.regNo}
-                  </li>
-                  <li>
-                    <strong>Branch:</strong> {studentData.branch}
-                  </li>
-                  <li>
-                    <strong>Section:</strong> {studentData.section}
-                  </li>
-                  <li>
-                    <strong>Status:</strong> {studentData.status}
-                  </li>
-                  <li>
-                    <strong>College:</strong> {studentData.college}
                   </li>
                 </ul>
               </div>

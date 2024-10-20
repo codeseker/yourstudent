@@ -52,7 +52,7 @@ export const columns: ColumnDef<Student>[] = [
   {
     accessorKey: "image",
     header: () => <div className="text-left">Image</div>,
-    cell: ({ row }) => (
+    cell: () => (
       <Avatar>
         <AvatarImage src="https://github.com/shadcn.png" />
         <AvatarFallback>At</AvatarFallback>

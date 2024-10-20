@@ -3,10 +3,9 @@
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import Sidebar from "@/app/components/Sidebar";
 import { StudentDataTable } from "@/app/components/StudentData";
-import { Button } from "@/components/ui/button";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 
 interface Student {
@@ -30,42 +29,43 @@ function BatchDetail() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const getSectionData = useCallback(async (): Promise<SectionResponse> => {
+    try {
+      const { data } = await axios.get<SectionResponse>(
+        `/api/v1/admin/batch/${batchYear}/${section}`
+      );
+      return data;
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      return {
+        success: false,
+        message:
+          axiosError.response?.data?.message || "An unexpected error occurred",
+        students: [],
+      };
+    }
+  }, [batchYear, section]);
+
   useEffect(() => {
     const fetchSectionData = async () => {
       try {
-        const sectionData: SectionResponse = await getSectionData();
+        const sectionData = await getSectionData();
 
         if (!sectionData.success) {
-          toast(sectionData.message);
+          toast.error(sectionData.message);
         } else {
           setStudents(sectionData.students);
-          toast("Section data Fetched");
+          toast.success("Section data fetched successfully");
         }
       } catch (error) {
-        toast("Error loading data");
+        toast.error("Error loading data");
       } finally {
         setLoading(false);
       }
     };
 
     fetchSectionData();
-  }, [batchYear, section]);
-
-  const getSectionData = async () => {
-    try {
-      const { data } = await axios.get(
-        `/api/v1/admin/batch/${batchYear}/${section}`
-      );
-      return data;
-    } catch (error: any) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message || "An unexpected error occurred",
-        students: [],
-      };
-    }
-  };
+  }, [getSectionData]);
 
   return (
     <div>

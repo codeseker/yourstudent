@@ -1,11 +1,11 @@
 import { allAssignedTeachers } from "@/app/lib/firebaseFunctions";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import cache from "@/app/lib/cache";
 
 const CACHE_KEY = "assignedTeachers";
 const CACHE_TTL = 300;
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const cachedData = await cache.get(CACHE_KEY);
 
   if (cachedData) {

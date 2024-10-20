@@ -8,6 +8,7 @@ export async function GET(
 ) {
   const { batchYear, sectionName } = params;
   const cacheKey = `${batchYear}-${sectionName}`;
+
   try {
     const cachedData = cache.get(cacheKey);
 
@@ -15,6 +16,7 @@ export async function GET(
       // If cached data exists, return it
       return NextResponse.json(cachedData, { status: 200 });
     }
+
     // Fetch the section data
     const sectionData = await getSectionData(batchYear, sectionName);
 
@@ -27,6 +29,7 @@ export async function GET(
 
     // Cache the fetched data
     cache.set(cacheKey, sectionData);
+
     return NextResponse.json(
       {
         message: "Section data fetched successfully",
@@ -35,12 +38,18 @@ export async function GET(
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let errorMessage = "An unexpected error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
       {
         message: "Error fetching section data",
         success: false,
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );

@@ -35,12 +35,18 @@ export async function GET(
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let errorMessage = "An unexpected error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
       {
         message: "Error fetching section data",
         success: false,
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );

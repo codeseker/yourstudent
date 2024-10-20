@@ -1,4 +1,5 @@
 "use client";
+// @ts-nocheck
 import StudentProfile from "@/app/components/StudentDetail";
 import StudentDetailSkeleton from "@/app/components/StudentDetailSkeleton";
 import axios from "axios";

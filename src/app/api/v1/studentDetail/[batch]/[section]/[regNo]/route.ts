@@ -7,7 +7,6 @@ export async function GET(
   { params }: { params: { batch: string; section: string; regNo: string } }
 ) {
   const { batch, regNo, section } = params;
-  const url = new URL(req.url);
 
   if (!batch || !regNo) {
     return NextResponse.json(

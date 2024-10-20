@@ -31,12 +31,12 @@ interface BatchResponse {
 
 interface SingleSection {
   id: string;
-  created: Boolean;
+  created: boolean;
 }
 
 interface SectionsResponse {
   message: string;
-  success: Boolean;
+  success: boolean;
   sections: SingleSection[];
 }
 

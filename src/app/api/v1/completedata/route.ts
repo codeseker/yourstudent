@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import cache from "@/app/lib/cache";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     // Check if data is in cache
     const cachedData = cache.get("batches");
@@ -34,8 +34,8 @@ export async function GET(req: NextRequest) {
         const totalSections = sectionsSnapshot.size; // Number of sections
 
         return {
-          year: year, // Batch year
-          totalSections: totalSections, // Total number of sections in this batch
+          year, // Batch year
+          totalSections, // Total number of sections in this batch
         };
       })
     );
@@ -51,12 +51,18 @@ export async function GET(req: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    let errorMessage = "An unexpected error occurred";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
     return NextResponse.json(
       {
         message: "Failed to fetch data",
         success: false,
-        error: error.message,
+        error: errorMessage,
       },
       { status: 500 }
     );

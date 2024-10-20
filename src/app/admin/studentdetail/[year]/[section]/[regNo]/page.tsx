@@ -1,9 +1,9 @@
 "use client";
 import StudentProfile from "@/app/components/StudentDetail";
 import StudentDetailSkeleton from "@/app/components/StudentDetailSkeleton";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type StudentData = {
   tenthMaxMarks: number;
@@ -74,42 +74,43 @@ type StudentData = {
 type StudentResponse = {
   message: string;
   success: boolean;
-  studentData: StudentData;
+  studentData: StudentData | null;
 };
 
 const StudentDetail = () => {
   const [student, setStudent] = useState<StudentData | undefined>(undefined);
   const { year, regNo, section } = useParams();
 
-  useEffect(() => {
-    const fetchBatchData = async () => {
-      const studentData: StudentResponse = await getStudentData();
+  const getStudentData = useCallback(async (): Promise<StudentResponse> => {
+    try {
+      const { data } = await axios.get<StudentResponse>(
+        `/api/v1/studentDetail/${year}/${section}/${regNo}`
+      );
+      return data;
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      return {
+        success: false,
+        message:
+          axiosError.response?.data?.message || "An unexpected error occurred",
+        studentData: null,
+      };
+    }
+  }, [year, section, regNo]);
 
-      if (!studentData.success) {
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      const studentData = await getStudentData();
+
+      if (!studentData.success || !studentData.studentData) {
         console.log(studentData.message);
       } else {
         setStudent(studentData.studentData);
       }
     };
 
-    fetchBatchData();
-  }, [year, regNo]);
-
-  const getStudentData = async () => {
-    try {
-      const { data } = await axios.get(
-        `/api/v1/studentDetail/${year}/${section}/${regNo}`
-      );
-      return data;
-    } catch (error: any) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message || "An unexpected error occurred",
-        studentData: null,
-      };
-    }
-  };
+    fetchStudentData();
+  }, [getStudentData]);
 
   return (
     <div>

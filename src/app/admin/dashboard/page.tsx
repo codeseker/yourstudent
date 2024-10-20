@@ -7,8 +7,6 @@ import { BatchesData } from "@/app/components/BatchTable";
 import { Button } from "@/components/ui/button";
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import Link from "next/link";
-import { Input } from "@/components/ui/input";
-
 interface YearData {
   year: string;
   totalSections: number;
@@ -22,7 +20,7 @@ interface BatchesData {
 
 function AdminDashboard() {
   const [year, setYears] = useState<YearData[]>([]);
-  const [loading, setLoading] = useState<Boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   useEffect(() => {
     const fetchBatches = async () => {
       try {

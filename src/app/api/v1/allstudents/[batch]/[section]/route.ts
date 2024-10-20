@@ -21,7 +21,7 @@ export async function GET(
 
   const cacheKey = `students_${batch}_${section}`;
 
-  let cachedResponse = await cache.get<Res>(cacheKey);
+  const cachedResponse = await cache.get<Res>(cacheKey);
   if (cachedResponse) {
     console.log("Returning data from cache");
     return NextResponse.json(

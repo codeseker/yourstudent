@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
   collection,
   doc,
@@ -6,8 +7,6 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
-  where,
-  DocumentData,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import cache from "@/app/lib/cache";

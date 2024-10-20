@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
-import Link from "next/link";
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import { FaSpinner } from "react-icons/fa";
