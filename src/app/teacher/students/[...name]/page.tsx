@@ -136,7 +136,7 @@ const ListUser: React.FC = () => {
                 <SelectValue placeholder="Select Gender" />
               </SelectTrigger>
               <SelectContent>
-                {["Male", "Female"].map((ele, index) => (
+                {["Male", "Female"].map((ele: string, index: number) => (
                   <SelectItem value={ele} key={index}>
                     {ele}
                   </SelectItem>
