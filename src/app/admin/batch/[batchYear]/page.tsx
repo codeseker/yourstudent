@@ -24,7 +24,6 @@ function BatchDetail() {
   const { batchYear } = useParams();
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
 
   const getBatchData = useCallback(async (): Promise<BatchResponse> => {
     try {

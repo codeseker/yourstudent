@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import axios, { AxiosError } from "axios"; // Import AxiosError
+import axios from "axios"; // Import AxiosError
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import { FaSpinner } from "react-icons/fa";

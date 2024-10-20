@@ -4,7 +4,7 @@ import { addDataToDb } from "@/app/lib/firebaseFunctions";
 import cache from "@/app/lib/cache";
 
 interface ExcelRow {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface WorksheetData {
