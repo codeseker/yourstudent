@@ -1,6 +1,6 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -8,20 +8,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
-import Loader from "./Loader";
-import { Input } from "@/components/ui/input";
+import Loader from "./Loader"; // Assuming Loader component exists and shows a spinner
 
-interface SingleYear {
+// Interfaces for API responses
+interface Year {
   year: string;
   totalSections: number;
 }
 
+interface TeacherBatch {
+  batch: string;
+  sections: string[];
+}
+
 interface BatchResponse {
   message: string;
-  years: SingleYear[];
   success: boolean;
+  years?: Year[];
+  batches?: TeacherBatch[];
 }
 
 interface SingleSection {
@@ -41,10 +48,21 @@ interface Student {
 
 interface StudentsResponse {
   message: string;
+  success: boolean;
   students: Student[];
+}
+
+interface MarksRes {
+  message: string;
   success: boolean;
 }
 
+interface StudentAssignmentFormProps {
+  userRole: string;
+  email: string | null | undefined;
+}
+
+// Subjects per semester
 const subjectsPerSemester: Record<string, string[]> = {
   "Semester 1": ["Mathematics I", "Physics", "Chemistry", "English"],
   "Semester 2": [
@@ -86,98 +104,107 @@ const subjectsPerSemester: Record<string, string[]> = {
   ],
 };
 
-interface MarksRes {
-  message: string;
-  success: boolean;
-}
-
-interface Res {
-  data: MarksRes;
-}
-
-const StudentAssignmentForm: React.FC = () => {
+const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
+  userRole,
+  email,
+}) => {
   const [selectedBatch, setSelectedBatch] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedRegNo, setSelectedRegNo] = useState<string>("");
   const [selectedSemester, setSelectedSemester] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedAssignment, setSelectedAssignment] = useState<string>("");
-  const [batches, setBatches] = useState<SingleYear[]>([]);
-  const [sections, setSections] = useState<SingleSection[]>([]);
+  const [marks, setMarks] = useState<string>("");
+  const [batches, setBatches] = useState<string[]>([]);
+  const [sections, setSections] = useState<string[]>([]);
   const [regNos, setRegNos] = useState<Student[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [marks, setMarks] = useState<string>("");
 
-  // Fetch batches from API
+  // Fetch all batches (admin or teacher) on component mount
   useEffect(() => {
-    const fetchAllBatches = async () => {
+    const fetchBatches = async () => {
       try {
-        const { data }: { data: BatchResponse } = await axios.get(
-          "/api/v1/completedata"
-        );
+        const response =
+          userRole === "admin"
+            ? await axios.get("/api/v1/completedata")
+            : await axios.post("/api/v1/teacher/completedata", { email });
+
+        const data: BatchResponse = response.data;
+
         if (data.success) {
-          setBatches(data.years);
+          const fetchedBatches =
+            userRole === "admin"
+              ? data.years?.map((year) => year.year) || []
+              : data.batches?.map((batch) => batch.batch) || [];
+          setBatches(fetchedBatches);
         } else {
-          console.error("Failed to fetch batches:", data.message);
+          toast.error(data.message);
         }
       } catch (error) {
         console.error("Error fetching batches:", error);
+        toast.error("Failed to fetch batches.");
       }
     };
-    fetchAllBatches();
-  }, []);
 
-  const getSections = async (batch: string) => {
+    fetchBatches();
+  }, [userRole, email]);
+
+  // Fetch sections based on selected batch
+  const fetchSections = async (batch: string) => {
     try {
       const { data }: { data: SectionsResponse } = await axios.get(
         `/api/v1/allsections/${batch}`
       );
-      setSections(data.sections);
+
+      if (data.success) {
+        setSections(data.sections.map((section) => section.id));
+      } else {
+        toast.error(data.message);
+      }
     } catch (error) {
       console.error("Error fetching sections:", error);
+      toast.error("Failed to fetch sections.");
     }
   };
 
-  const handleBatchChange = (batch: string) => {
-    setSelectedBatch(batch);
-    setSelectedSection("");
-    setSections([]);
-    getSections(batch);
-  };
-
-  const getStudents = async (batch: string, section: string) => {
+  // Fetch students based on selected batch and section
+  const fetchStudents = async (batch: string, section: string) => {
     try {
       const { data }: { data: StudentsResponse } = await axios.get(
         `/api/v1/allstudents/${batch}/${section}`
       );
+
       if (data.success) {
         setRegNos(data.students);
       } else {
-        console.error("Failed to fetch students:", data.message);
+        toast.error(data.message);
       }
     } catch (error) {
       console.error("Error fetching students:", error);
+      toast.error("Failed to fetch students.");
     }
-  };
-
-  const handleSemesterChange = (semester: string) => {
-    setSelectedSemester(semester);
-    setSubjects(subjectsPerSemester[semester] || []);
   };
 
   const handleAssign = async () => {
     if (
-      selectedBatch &&
-      selectedSection &&
-      selectedRegNo &&
-      selectedSemester &&
-      selectedSubject &&
-      selectedAssignment
+      !selectedBatch ||
+      !selectedSection ||
+      !selectedRegNo ||
+      !selectedSemester ||
+      !selectedSubject ||
+      !selectedAssignment ||
+      !marks
     ) {
-      setLoading(true);
-      try {
-        const { data }: Res = await axios.post("/api/v1/assignment/marks", {
+      toast.error("Please fill all the fields.");
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const { data }: { data: MarksRes } = await axios.post(
+        "/api/v1/assignment/marks",
+        {
           batch: selectedBatch,
           section: selectedSection,
           regNo: selectedRegNo,
@@ -185,173 +212,126 @@ const StudentAssignmentForm: React.FC = () => {
           subject: selectedSubject,
           assignment: selectedAssignment,
           marks,
-        });
-
-        setLoading(false);
-
-        if (!data.success) {
-          toast(data.message);
-          return;
         }
+      );
 
+      if (data.success) {
         toast.success(data.message);
-      } catch (error) {
-        toast.error("Internal Server Error");
+      } else {
+        toast.error(data.message);
       }
-    } else {
-      toast.error("Please fill all the fields.");
+    } catch (error) {
+      console.error("Error submitting marks:", error);
+      toast.error("Failed to submit marks.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="bg-card">
-      <div className="w-full rounded-xl shadow-xl p-8">
-        <h1 className="text-3xl font-semibold text-center text-gray-700 mb-4">
-          Upload Student Assignment Marks
-        </h1>
+    <div className="bg-card p-8 rounded-xl shadow-xl">
+      <h1 className="text-3xl font-semibold text-center text-gray-700 mb-6">
+        Upload Student Assignment Marks
+      </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Batch
-              </label>
-              <Select onValueChange={handleBatchChange}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Batch" />
-                </SelectTrigger>
-                <SelectContent>
-                  {batches.map((batch) => (
-                    <SelectItem value={batch.year} key={batch.year}>
-                      {batch.year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <SelectComponent
+          label="Batch"
+          options={batches}
+          onChange={(value) => {
+            setSelectedBatch(value);
+            fetchSections(value);
+          }}
+        />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Section
-              </label>
-              <Select
-                onValueChange={(value) => {
-                  setSelectedSection(value);
-                  getStudents(selectedBatch, value);
-                }}
-              >
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Section" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sections.map((section) => (
-                    <SelectItem value={section.id} key={section.id}>
-                      {section.id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Reg. No
-              </label>
-              <Select onValueChange={setSelectedRegNo}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Reg. No" />
-                </SelectTrigger>
-                <SelectContent>
-                  {regNos.map((student) => (
-                    <SelectItem value={student.regNo} key={student.regNo}>
-                      {student.regNo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Semester
-              </label>
-              <Select onValueChange={handleSemesterChange}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(subjectsPerSemester).map((semester) => (
-                    <SelectItem value={semester} key={semester}>
-                      {semester}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Subject
-              </label>
-              <Select onValueChange={setSelectedSubject}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem value={subject} key={subject}>
-                      {subject}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Assignment
-              </label>
-              <Select onValueChange={setSelectedAssignment}>
-                <SelectTrigger className="w-full bg-white">
-                  <SelectValue placeholder="Select Assignment No." />
-                </SelectTrigger>
-                <SelectContent>
-                  {["Assignment 1", "Assignment 2", "Assignment 3"].map(
-                    (assignment) => (
-                      <SelectItem value={assignment} key={assignment}>
-                        {assignment}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Enter Marks
-              </label>
-              <Input
-                placeholder="Enter Marks..."
-                className=""
-                onChange={(e) => setMarks(e.target.value)}
-              />
-            </div>
-
-            <Button
-              onClick={handleAssign}
-              className="w-full "
-              disabled={loading}
-            >
-              {loading ? <Loader /> : "Upload Marks"}
-            </Button>
-          </div>
-        </div>
+        <SelectComponent
+          label="Section"
+          options={sections}
+          onChange={(value) => {
+            setSelectedSection(value);
+            fetchStudents(selectedBatch, value);
+          }}
+        />
+        <SelectComponent
+          label="Reg. No"
+          options={regNos.map((student) => student.regNo)}
+          onChange={setSelectedRegNo}
+        />
+        <SelectComponent
+          label="Semester"
+          options={Object.keys(subjectsPerSemester)}
+          onChange={(value) => {
+            setSelectedSemester(value);
+            setSubjects(subjectsPerSemester[value]);
+          }}
+        />
+        <SelectComponent
+          label="Subject"
+          options={subjects}
+          onChange={setSelectedSubject}
+        />
+        <SelectComponent
+          label="Assignment"
+          options={["Assignment 1", "Assignment 2", "Assignment 3"]}
+          onChange={setSelectedAssignment}
+        />
+        <InputComponent
+          label="Enter Marks"
+          value={marks}
+          onChange={(e) => setMarks(e.target.value)}
+        />
       </div>
+
+      <Button onClick={handleAssign} className="w-full mt-6" disabled={loading}>
+        {loading ? <Loader /> : "Upload Marks"}
+      </Button>
     </div>
   );
 };
+
+const SelectComponent = ({
+  label,
+  options,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-600 mb-2">
+      {label}
+    </label>
+    <Select onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={`Select ${label}`} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem key={option} value={option}>
+            {option}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
+
+const InputComponent = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div>
+    <label className="block text-sm font-medium text-gray-600 mb-2">
+      {label}
+    </label>
+    <Input value={value} onChange={onChange} placeholder={`Enter ${label}`} />
+  </div>
+);
 
 export default StudentAssignmentForm;

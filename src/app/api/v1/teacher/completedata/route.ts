@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 interface Res {
   success: boolean;
-  batches: Array<Batch>;
+  batches: Batch[];
 }
 
 interface Batch {
@@ -16,45 +16,61 @@ interface CachedRes extends Res {
   message: string;
 }
 
-const CACHE_EXPIRATION_TIME = 60 * 5; // 5 minutes in seconds
+const CACHE_EXPIRATION_TIME = 60 * 5;
 
 export async function POST(req: NextRequest) {
-  const { email } = await req.json();
+  try {
+    const { email } = await req.json();
 
-  // Check if the data for the given email is already cached
-  const cachedData: CachedRes | undefined = cache.get(email);
+    if (!email) {
+      console.log(email);
+      return NextResponse.json(
+        { message: "Email is required", success: false },
+        { status: 400 }
+      );
+    }
 
-  if (cachedData) {
+    // Attempt to retrieve cached data
+    const cachedData = cache.get(email) as CachedRes | undefined;
+
+    if (cachedData) {
+      return NextResponse.json(
+        {
+          message: "Teacher batches fetched from cache",
+          success: true,
+          batches: cachedData.batches,
+        },
+        { status: 200 }
+      );
+    }
+
+    // Fetch data from Firestore if not found in cache
+    const data: Res = await getTeacherBatches(email);
+
+    if (!data.success) {
+      return NextResponse.json(
+        { message: "Error while fetching the data", success: false },
+        { status: 500 }
+      );
+    }
+
+    // Cache the response for future use
+    const cacheData: CachedRes = { ...data, message: "Cached response" };
+    cache.set(email, cacheData, CACHE_EXPIRATION_TIME);
+
     return NextResponse.json(
       {
-        message: "Teacher batches fetched from cache",
+        message: "Teacher batches fetched successfully",
         success: true,
-        batches: cachedData.batches,
+        batches: data.batches,
       },
       { status: 200 }
     );
-  }
-
-  // If not in cache, fetch the data from Firestore
-  const data: Res = await getTeacherBatches(email);
-
-  if (!data.success) {
+  } catch (error) {
+    console.error("Error processing request:", error);
     return NextResponse.json(
-      { message: "Error while fetching the data", success: false },
+      { message: "Internal Server Error", success: false },
       { status: 500 }
     );
   }
-
-  // Cache the response for future requests
-  const cacheData: CachedRes = { ...data, message: "Cached response" };
-  cache.set(email, cacheData, CACHE_EXPIRATION_TIME);
-
-  return NextResponse.json(
-    {
-      message: "Teacher batches fetched successfully",
-      success: true,
-      batches: data.batches,
-    },
-    { status: 200 }
-  );
 }
