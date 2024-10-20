@@ -369,7 +369,7 @@ export async function queryStudent(name: string) {
   try {
     const batchesRef = collection(db, "batches");
     const batchDocs = await getDocs(batchesRef);
-    let results = [];
+    const results = [];
 
     // Iterate through each batch document
     for (const batchDoc of batchDocs.docs) {
