@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   collection,
   doc,
@@ -205,12 +204,6 @@ export async function getStudentCount(batchYear: string) {
   const studentsCollection = collection(db, `batches/${batchYear}/students`);
   const studentsSnapshot = await getDocs(studentsCollection);
   return studentsSnapshot.size;
-}
-
-interface Student {
-  id: string;
-  batch: string;
-  [key: string]: any; // To allow any other dynamic fields
 }
 
 export async function getAllSections(batch: string) {

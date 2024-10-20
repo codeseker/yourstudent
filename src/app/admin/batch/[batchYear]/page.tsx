@@ -64,10 +64,6 @@ function BatchDetail() {
     fetchBatchData();
   }, [getBatchData]);
 
-  const handleSectionClick = (sectionName: string) => {
-    router.push(`/admin/batch/${batchYear}/${sectionName}`);
-  };
-
   return (
     <div>
       {loading ? (

@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import axios from "axios";
+import axios, { AxiosError } from "axios"; // Import AxiosError
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import { FaSpinner } from "react-icons/fa";
@@ -59,8 +59,17 @@ function UploadBatch() {
         setBatchYear("");
         setSectionName("");
         setFile(null);
-      } catch (error) {
-        toast("Error occurred while uploading.");
+      } catch (error: unknown) {
+        // Use unknown instead of any
+        if (axios.isAxiosError(error)) {
+          // If it's an Axios error, we can access the response data
+          toast(
+            error.response?.data?.message || "Error occurred while uploading."
+          );
+        } else {
+          // Handle unexpected errors
+          toast("Error occurred while uploading.");
+        }
       } finally {
         setIsSubmitting(false);
       }

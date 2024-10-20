@@ -1,11 +1,10 @@
 "use client";
-// @ts-nocheck
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import { SectionDataTable } from "@/app/components/SectionDataTable";
 import TeacherSidebar from "@/app/components/TeacherSidebar";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 
 interface Section {
@@ -26,6 +25,21 @@ function TeacherBatch() {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const getBatchData = useCallback(async (): Promise<BatchResponse> => {
+    try {
+      const { data } = await axios.get(`/api/v1/teacher/batch/${year}`);
+      return data;
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+      return {
+        batch: "",
+        success: false,
+        message: "An unexpected error occurred",
+        sections: [],
+      };
+    }
+  }, [year]);
+
   useEffect(() => {
     const fetchBatchData = async () => {
       try {
@@ -45,21 +59,8 @@ function TeacherBatch() {
     };
 
     fetchBatchData();
-  }, [year]);
+  }, [getBatchData]);
 
-  const getBatchData = async () => {
-    try {
-      const { data } = await axios.get(`/api/v1/teacher/batch/${year}`);
-      return data;
-    } catch (error: any) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message || "An unexpected error occurred",
-        sections: [],
-      };
-    }
-  };
   return (
     <div>
       {loading ? (

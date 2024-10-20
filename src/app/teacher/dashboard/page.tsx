@@ -1,7 +1,6 @@
 "use client";
-// @ts-nocheck
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { BatchesData } from "@/app/components/BatchTable";
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
@@ -13,9 +12,21 @@ interface YearData {
   totalSections: number;
 }
 
+interface Batch {
+  batch: string;
+  sections: Array<{
+    sectionName: string;
+  }>;
+}
+
+interface FetchBatchesResponse {
+  success: boolean;
+  batches: Batch[];
+}
+
 function TeacherDashboard() {
   const { data: session } = useSession();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [year, setYear] = useState<YearData[]>([]);
 
   useEffect(() => {
@@ -27,26 +38,25 @@ function TeacherDashboard() {
 
       setLoading(true);
       try {
-        const response = await axios.post("/api/v1/teacher/completedata", {
-          email: session.user.email,
-        });
+        const response = await axios.post<FetchBatchesResponse>(
+          "/api/v1/teacher/completedata",
+          {
+            email: session.user.email,
+          }
+        );
 
         if (response.data.success) {
-          const year: any = [];
-          const batches = response.data.batches;
-          //   console.log(batches);
-          batches.forEach((batch: any) => {
-            year.push({
-              year: batch.batch,
-              totalSections: batch.sections.length,
-            });
-          });
+          const yearData: YearData[] = response.data.batches.map((batch) => ({
+            year: batch.batch,
+            totalSections: batch.sections.length,
+          }));
 
-          setYear(year);
+          setYear(yearData);
         } else {
           toast.error("Failed to fetch batches.");
         }
-      } catch (error) {
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError;
         toast.error("Error fetching batches.");
       } finally {
         setLoading(false);

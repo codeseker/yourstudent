@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     const excelData = worksheets[0].data;
 
-    const reponse = await addDataToDb(batch, section, excelData);
+    const reponse: boolean = await addDataToDb(batch, section, excelData);
     if (!reponse) {
       return NextResponse.json(
         {

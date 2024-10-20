@@ -1,11 +1,10 @@
 "use client";
-// @ts-nocheck
 import { AdminPanelSkeleton } from "@/app/components/AdminPanelSkeleton";
 import { StudentDataTable } from "@/app/components/StudentData";
 import TeacherSidebar from "@/app/components/TeacherSidebar";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 
 interface Student {
@@ -29,42 +28,43 @@ function TeacherSectionData() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const getSectionData = useCallback(async (): Promise<SectionResponse> => {
+    try {
+      const { data } = await axios.get(
+        `/api/v1/teacher/batch/${year}/${section}`
+      );
+      return data;
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+      return {
+        success: false,
+        message: "An unexpected error occurred",
+        students: [],
+      };
+    }
+  }, [year, section]);
+
   useEffect(() => {
     const fetchSectionData = async () => {
       try {
         const sectionData: SectionResponse = await getSectionData();
 
         if (!sectionData.success) {
-          toast(sectionData.message);
+          toast.error(sectionData.message);
         } else {
           setStudents(sectionData.students);
-          toast("Section data Fetched");
+          toast.success("Section data Fetched");
         }
       } catch (error) {
-        toast("Error loading data");
+        toast.error("Error loading data");
       } finally {
         setLoading(false);
       }
     };
 
     fetchSectionData();
-  }, [year, section]);
+  }, [getSectionData]);
 
-  const getSectionData = async () => {
-    try {
-      const { data } = await axios.get(
-        `/api/v1/teacher/batch/${year}/${section}`
-      );
-      return data;
-    } catch (error: any) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message || "An unexpected error occurred",
-        students: [],
-      };
-    }
-  };
   return (
     <div>
       {loading ? (

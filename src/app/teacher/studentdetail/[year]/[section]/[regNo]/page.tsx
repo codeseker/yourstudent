@@ -1,10 +1,9 @@
 "use client";
-// @ts-nocheck
 import StudentProfile from "@/app/components/StudentDetail";
 import StudentDetailSkeleton from "@/app/components/StudentDetailSkeleton";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type StudentData = {
   tenthMaxMarks: number;
@@ -82,35 +81,35 @@ const StudentDetail = () => {
   const [student, setStudent] = useState<StudentData | undefined>(undefined);
   const { year, regNo, section } = useParams();
 
-  useEffect(() => {
-    const fetchBatchData = async () => {
-      const studentData: StudentResponse = await getStudentData();
-
-      if (!studentData.success) {
-        console.log(studentData.message);
-      } else {
-        setStudent(studentData.studentData);
-      }
-    };
-
-    fetchBatchData();
-  }, [year, regNo]);
-
-  const getStudentData = async () => {
+  // Use useCallback to memoize the getStudentData function
+  const getStudentData = useCallback(async () => {
     try {
-      const { data } = await axios.get(
+      const { data } = await axios.get<StudentResponse>(
         `/api/v1/studentDetail/${year}/${section}/${regNo}`
       );
       return data;
-    } catch (error: any) {
+    } catch (error) {
+      const axiosError = error as AxiosError;
       return {
         success: false,
-        message:
-          error.response?.data?.message || "An unexpected error occurred",
+        message: "An unexpected error occurred",
         studentData: null,
       };
     }
-  };
+  }, [year, section, regNo]);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      const studentData = await getStudentData();
+      if (!studentData.success || !studentData.studentData) {
+        console.log(studentData.message);
+      } else {
+        setStudent(studentData.studentData); // This will only be called if studentData is not null
+      }
+    };
+
+    fetchStudentData();
+  }, [getStudentData]);
 
   return (
     <div>
