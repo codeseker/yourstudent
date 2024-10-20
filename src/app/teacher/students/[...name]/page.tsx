@@ -1,36 +1,65 @@
 "use client";
-import { useParams } from "next/navigation";
-import React, { useState, ChangeEvent, useEffect } from "react";
+import Navbar from "@/app/components/Navbar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import axios from "axios";
+import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, ChangeEvent } from "react";
 
-interface User {
-  id: number;
-  name: string;
-  major: string;
-  appliedDate: string;
-  location: string;
-  gpa: string;
-  avatar: string;
-  year: string;
-  skills: string[];
+interface Student {
+  id: string;
+  regNo: string;
+  batch: string;
+  section: string;
+  fullName: string;
+  branch: string;
+  gender: string;
+  cgpa: string;
+  dob: string;
+  mobileNumber: string;
+  fatherName: string;
+  motherName: string;
+  homeTown: string;
 }
 
 interface Filters {
-  major: string;
-  gpa: string;
-  year: string;
+  branch: string;
+  cgpa: string;
+  gender: string;
 }
 
 const ListUser: React.FC = () => {
-  const [activeUser, setActiveUser] = useState<User | null>(null);
+  const [students, setStudents] = useState<Student[]>([]);
   const [filters, setFilters] = useState<Filters>({
-    major: "",
-    gpa: "",
-    year: "",
+    branch: "",
+    cgpa: "",
+    gender: "",
   });
 
-  const handleOpenDetails = (user: User) => {
-    setActiveUser(user === activeUser ? null : user);
-  };
+  const { name } = useParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await axios.post("/api/v1/query", {
+          name: decodeURIComponent(name[0]),
+        });
+        setStudents(response.data.students);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+    fetchStudents();
+  }, [name]);
 
   const handleFilterChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -39,189 +68,118 @@ const ListUser: React.FC = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const users: User[] = [
-    {
-      id: 1,
-      name: "John Doe",
-      major: "Computer Science",
-      appliedDate: "21 Aug, 2023",
-      location: "California State University",
-      gpa: "3.8",
-      avatar: "https://via.placeholder.com/48",
-      year: "Senior",
-      skills: ["JavaScript", "React", "Node.js"],
-    },
-    {
-      id: 2,
-      name: "Emily Clark",
-      major: "Mechanical Engineering",
-      appliedDate: "17 Jul, 2023",
-      location: "MIT",
-      gpa: "4.0",
-      avatar: "https://via.placeholder.com/48",
-      year: "Junior",
-      skills: ["AutoCAD", "SolidWorks", "MATLAB"],
-    },
-    {
-      id: 3,
-      name: "Michael Lee",
-      major: "Electrical Engineering",
-      appliedDate: "15 Jun, 2023",
-      location: "Stanford University",
-      gpa: "3.7",
-      avatar: "https://via.placeholder.com/48",
-      year: "Sophomore",
-      skills: ["Circuit Design", "VHDL", "FPGA"],
-    },
-    {
-      id: 4,
-      name: "Sarah Johnson",
-      major: "Biotechnology",
-      appliedDate: "11 May, 2023",
-      location: "Harvard University",
-      gpa: "3.9",
-      avatar: "https://via.placeholder.com/48",
-      year: "Senior",
-      skills: ["PCR", "Gene Editing", "Bioinformatics"],
-    },
-  ];
+  const handleStudentClick = (student: Student) => {
+    router.push(
+      `/teacher/studentdetail/${student.batch}/${student.section}/${student.regNo}`
+    );
+  };
 
-  const filteredUsers = users.filter((user) => {
+  const filteredStudents = students.filter((student) => {
     return (
-      (filters.major === "" || user.major.includes(filters.major)) &&
-      (filters.gpa === "" || user.gpa >= filters.gpa) &&
-      (filters.year === "" || user.year === filters.year)
+      (filters.branch === "" || student.branch.includes(filters.branch)) &&
+      (filters.cgpa === "" ||
+        parseFloat(student.cgpa) >= parseFloat(filters.cgpa)) &&
+      (filters.gender === "" || student.gender === filters.gender)
     );
   });
 
-  const { name } = useParams();
-  console.log(decodeURIComponent(name[0]));
-
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <div className="w-1/4 bg-white p-6 shadow-lg">
-        <h3 className="text-2xl font-semibold text-gray-800 mb-6">
-          Filter Students
-        </h3>
+    <div className="bg-gray-100 min-h-screen">
+      <Navbar />
+      <div className="flex flex-col md:flex-row my-8 mx-4 md:mx-16 space-y-6 md:space-y-0 md:space-x-6">
+        {/* Filter Section */}
+        <div className="w-full md:w-1/4 bg-white p-8 shadow-xl rounded-lg">
+          <h3 className="text-2xl font-bold text-gray-800 mb-8">
+            Filter Students
+          </h3>
 
-        {/* Major Filter */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Major
-          </label>
-          <input
-            type="text"
-            name="major"
-            value={filters.major}
-            onChange={handleFilterChange}
-            className="w-full border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg p-2"
-            placeholder="e.g., Computer Science"
-          />
-        </div>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Branch
+            </label>
+            <Input
+              type="text"
+              name="branch"
+              value={filters.branch}
+              onChange={handleFilterChange}
+              className="p-3"
+              placeholder="e.g., Computer Science"
+            />
+          </div>
 
-        {/* GPA Filter */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Minimum GPA
-          </label>
-          <input
-            type="number"
-            name="gpa"
-            value={filters.gpa}
-            onChange={handleFilterChange}
-            className="w-full border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg p-2"
-            placeholder="e.g., 3.5"
-          />
-        </div>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Minimum CGPA
+            </label>
+            <Input
+              type="number"
+              name="cgpa"
+              value={filters.cgpa}
+              onChange={handleFilterChange}
+              className="p-3"
+              placeholder="e.g., 3.5"
+            />
+          </div>
 
-        {/* Year Filter */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Year
-          </label>
-          <select
-            name="year"
-            value={filters.year}
-            onChange={handleFilterChange}
-            className="w-full border-2 border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg p-2"
-          >
-            <option value="">Select Year</option>
-            <option value="Freshman">Freshman</option>
-            <option value="Sophomore">Sophomore</option>
-            <option value="Junior">Junior</option>
-            <option value="Senior">Senior</option>
-          </select>
-        </div>
-      </div>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Gender
+            </label>
 
-      {/* Main Content */}
-      <div className="w-3/4 p-6 space-y-6">
-        {filteredUsers.length > 0 ? (
-          filteredUsers.map((user) => (
-            <div
-              key={user.id}
-              className="bg-white shadow-md p-6 rounded-lg flex justify-between items-center transition-transform transform hover:scale-95"
+            <Select
+              value={filters.gender}
+              onValueChange={(value) =>
+                setFilters((prev) => ({ ...prev, gender: value }))
+              }
             >
-              <div className="flex items-center">
-                <img
-                  src={user.avatar}
-                  alt={user.name}
-                  className="w-16 h-16 rounded-full mr-6"
-                />
+              <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg p-3">
+                <SelectValue placeholder="Select Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                {["Male", "Female"].map((ele, index) => (
+                  <SelectItem value={ele} key={index}>
+                    {ele}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Student List Section */}
+        <div className="w-full md:w-full space-y-6  ">
+          {/* Total Students Label */}
+          <Badge className="h-8">
+            Total Students: {filteredStudents.length}
+          </Badge>
+
+          {filteredStudents.length > 0 ? (
+            filteredStudents.map((student) => (
+              <div
+                key={student.id}
+                className="bg-white shadow-md p-6 rounded-lg flex justify-between items-center cursor-pointer transform hover:scale-95 transition-transform duration-200"
+                onClick={() => handleStudentClick(student)}
+              >
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">
-                    {user.name}
+                    {student.fullName}
                   </h2>
-                  <p className="text-sm text-gray-600">{user.major}</p>
+                  <p className="text-sm text-gray-600">{student.branch}</p>
                   <p className="text-xs text-gray-400">
-                    Applied on: {user.appliedDate}
+                    Registration No: {student.regNo}
                   </p>
                 </div>
+                <Button className="">View Details</Button>
               </div>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => handleOpenDetails(user)}
-                  className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-lg hover:bg-blue-600 transition duration-200"
-                >
-                  {activeUser === user ? "Hide Details" : "Show Details"}
-                </button>
-              </div>
+            ))
+          ) : (
+            <div className="bg-white shadow-md p-6 rounded-lg">
+              <p className="text-gray-500 text-lg">
+                No students match your filter criteria.
+              </p>
             </div>
-          ))
-        ) : (
-          <div className="bg-white shadow-md p-6 rounded-lg">
-            <p className="text-gray-500 text-lg">
-              No students match your filter criteria.
-            </p>
-          </div>
-        )}
-
-        {activeUser && (
-          <div className="bg-gray-100 p-6 rounded-lg mt-6 shadow-inner">
-            <h3 className="text-lg font-bold text-gray-700">
-              Details for {activeUser.name}
-            </h3>
-            <p>
-              <strong>Major:</strong> {activeUser.major}
-            </p>
-            <p>
-              <strong>Location:</strong> {activeUser.location}
-            </p>
-            <p>
-              <strong>GPA:</strong> {activeUser.gpa}
-            </p>
-            <p>
-              <strong>Year:</strong> {activeUser.year}
-            </p>
-            <p>
-              <strong>Skills:</strong> {activeUser.skills.join(", ")}
-            </p>
-            <p>
-              <strong>Applied On:</strong> {activeUser.appliedDate}
-            </p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

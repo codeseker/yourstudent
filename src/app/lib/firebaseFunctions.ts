@@ -6,7 +6,6 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
-  query,
   where,
   DocumentData,
 } from "firebase/firestore";
@@ -370,6 +369,80 @@ export async function getTeacherBatches(email: string) {
     return {
       batches: [],
       success: false,
+    };
+  }
+}
+
+export async function queryStudent(name: string) {
+  try {
+    const batchesRef = collection(db, "batches");
+    const batchDocs = await getDocs(batchesRef);
+    let results = [];
+
+    // Iterate through each batch document
+    for (const batchDoc of batchDocs.docs) {
+      try {
+        const sectionsRef = collection(batchDoc.ref, "sections");
+        const sectionDocs = await getDocs(sectionsRef);
+
+        // Iterate through each section document
+        for (const sectionDoc of sectionDocs.docs) {
+          try {
+            const studentsRef = collection(sectionDoc.ref, "students");
+            const studentDocs = await getDocs(studentsRef);
+
+            // Iterate through each student document
+            for (const studentDoc of studentDocs.docs) {
+              const studentData = studentDoc.data();
+
+              // Check if the fullName matches the provided name
+              if (
+                studentData.fullName &&
+                studentData.fullName === name.toUpperCase()
+              ) {
+                results.push({
+                  id: studentDoc.id,
+                  ...studentData,
+                  batch: batchDoc.id,
+                  section: sectionDoc.id,
+                });
+              }
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching students from section: ${sectionDoc.id}`,
+              error
+            );
+            return {
+              success: false,
+              message: `Failed to fetch students from section: ${sectionDoc.id}`,
+            };
+          }
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching sections from batch: ${batchDoc.id}`,
+          error
+        );
+        return {
+          success: false,
+          message: `Failed to fetch sections from batch: ${batchDoc.id}`,
+        };
+      }
+    }
+
+    return {
+      success: true,
+      message: results.length
+        ? "Students fetched successfully."
+        : "No students found.",
+      data: results,
+    };
+  } catch (error) {
+    console.error("Error querying student:", error);
+    return {
+      success: false,
+      message: "Failed to query student. Please try again later.",
     };
   }
 }
