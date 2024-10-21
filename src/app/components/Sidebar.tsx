@@ -13,7 +13,7 @@ function Sidebar() {
   };
   return (
     <aside
-      className={`bg-card h-full rounded w-full md:w-64 p-4 absolute sm:relative transition-transform transform ${
+      className={`bg-card h-full text-black rounded w-full md:w-64 p-4 absolute sm:relative transition-transform transform ${
         false ? "translate-x-0" : "-translate-x-full"
       } sm:translate-x-0`}
     >
