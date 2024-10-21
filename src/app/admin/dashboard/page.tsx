@@ -47,7 +47,7 @@ function AdminDashboard() {
       {loading ? (
         <AdminPanelSkeleton />
       ) : (
-        <div className="min-h-screen flex flex-col md:flex-row dark:bg-background">
+        <div className="min-h-screen flex flex-col md:flex-row bg-background">
           <div className="border-r shadow">
             <Sidebar />
           </div>
