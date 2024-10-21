@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import React, { useState, useEffect, ChangeEvent } from "react";
@@ -43,19 +44,22 @@ const ListUser: React.FC = () => {
     cgpa: "",
     gender: "",
   });
-
+  const [loading, setLoading] = useState(true); // Add loading state
   const { name } = useParams();
   const router = useRouter();
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
+        setLoading(true); // Start loading
         const response = await axios.post("/api/v1/query", {
           name: decodeURIComponent(name[0]),
         });
         setStudents(response.data.students);
       } catch (error) {
         console.error("Error fetching students:", error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
     fetchStudents();
@@ -93,67 +97,85 @@ const ListUser: React.FC = () => {
             Filter Students
           </h3>
 
+          {/* Skeletons for Filter Inputs */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Branch
             </label>
-            <Input
-              type="text"
-              name="branch"
-              value={filters.branch}
-              onChange={handleFilterChange}
-              className="p-3"
-              placeholder="e.g., Computer Science"
-            />
+            {loading ? (
+              <Skeleton className="w-full h-10" />
+            ) : (
+              <Input
+                type="text"
+                name="branch"
+                value={filters.branch}
+                onChange={handleFilterChange}
+                className="p-3"
+                placeholder="e.g., Computer Science"
+              />
+            )}
           </div>
 
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Minimum CGPA
             </label>
-            <Input
-              type="number"
-              name="cgpa"
-              value={filters.cgpa}
-              onChange={handleFilterChange}
-              className="p-3"
-              placeholder="e.g., 3.5"
-            />
+            {loading ? (
+              <Skeleton className="w-full h-10" />
+            ) : (
+              <Input
+                type="number"
+                name="cgpa"
+                value={filters.cgpa}
+                onChange={handleFilterChange}
+                className="p-3"
+                placeholder="e.g., 3.5"
+              />
+            )}
           </div>
 
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Gender
             </label>
-
-            <Select
-              value={filters.gender}
-              onValueChange={(value) =>
-                setFilters((prev) => ({ ...prev, gender: value }))
-              }
-            >
-              <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg p-3">
-                <SelectValue placeholder="Select Gender" />
-              </SelectTrigger>
-              <SelectContent>
-                {["Male", "Female"].map((ele: string, index: number) => (
-                  <SelectItem value={ele} key={index}>
-                    {ele}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {loading ? (
+              <Skeleton className="w-full h-10" />
+            ) : (
+              <Select
+                value={filters.gender}
+                onValueChange={(value) =>
+                  setFilters((prev) => ({ ...prev, gender: value }))
+                }
+              >
+                <SelectTrigger className="w-full bg-white border border-gray-300 rounded-lg p-3">
+                  <SelectValue placeholder="Select Gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["Male", "Female"].map((ele: string, index: number) => (
+                    <SelectItem value={ele} key={index}>
+                      {ele}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
         </div>
 
         {/* Student List Section */}
-        <div className="w-full md:w-full space-y-6  ">
+        <div className="w-full md:w-full space-y-6">
           {/* Total Students Label */}
-          <Badge className="h-8">
-            Total Students: {filteredStudents.length}
-          </Badge>
+          {loading ? (
+            <Skeleton className="w-24 h-8" />
+          ) : (
+            <Badge className="h-8">
+              Total Students: {filteredStudents.length}
+            </Badge>
+          )}
 
-          {filteredStudents.length > 0 ? (
+          {loading ? (
+            <Skeleton className="w-full h-20" />
+          ) : filteredStudents.length > 0 ? (
             filteredStudents.map((student) => (
               <div
                 key={student.id}
