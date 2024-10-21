@@ -85,9 +85,11 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
             <div className="bg-card shadow rounded-lg p-6">
               <div className="flex flex-col items-center">
                 <Image
+                  width={120}
+                  height={120}
                   src="https://randomuser.me/api/portraits/men/94.jpg"
-                  className="w-32 h-32 bg-gray-300 rounded-full mb-4"
                   alt="Profile"
+                  className="rounded-full"
                 />
                 <h1 className="text-xl font-bold">{studentData.fullName}</h1>
                 <p className="text-gray-700">{studentData.branch}</p>
