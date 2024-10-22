@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton"; // Import Skeleton component from Shadcn
 import axios from "axios";
 import { toast } from "sonner";
 import Loader from "./Loader"; // Assuming Loader component exists and shows a spinner
@@ -120,6 +121,13 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
   const [regNos, setRegNos] = useState<Student[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [sectionDisabled, setSectionDisabled] = useState<boolean>(true);
+  const [studentDisabled, setStudentDisabled] = useState<boolean>(true);
+  const [semesterDisabled, setSemesterDisabled] = useState<boolean>(true);
+  const [subjectDisabled, setSubjectDisabled] = useState<boolean>(true);
+  const [assignmentDisabled, setAssignmentDisabled] = useState<boolean>(true);
+  const [loadingBatches, setLoadingBatches] = useState<boolean>(true); // State to show skeleton loader
+  const [loadingForm, setLoadingForm] = useState<boolean>(true);
 
   // Fetch all batches (admin or teacher) on component mount
   useEffect(() => {
@@ -144,6 +152,8 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
       } catch (error) {
         console.error("Error fetching batches:", error);
         toast.error("Failed to fetch batches.");
+      } finally {
+        setLoadingForm(false); // Stop showing skeleton once batches are fetched
       }
     };
 
@@ -153,12 +163,18 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
   // Fetch sections based on selected batch
   const fetchSections = async (batch: string) => {
     try {
+      setSectionDisabled(true);
+      setStudentDisabled(true);
+      setSemesterDisabled(true);
+      setSubjectDisabled(true);
+      setAssignmentDisabled(true);
       const { data }: { data: SectionsResponse } = await axios.get(
         `/api/v1/allsections/${batch}`
       );
 
       if (data.success) {
         setSections(data.sections.map((section) => section.id));
+        setSectionDisabled(false);
       } else {
         toast.error(data.message);
       }
@@ -171,12 +187,14 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
   // Fetch students based on selected batch and section
   const fetchStudents = async (batch: string, section: string) => {
     try {
+      setStudentDisabled(true);
       const { data }: { data: StudentsResponse } = await axios.get(
         `/api/v1/allstudents/${batch}/${section}`
       );
 
       if (data.success) {
         setRegNos(data.students);
+        setStudentDisabled(false);
       } else {
         toast.error(data.message);
       }
@@ -234,53 +252,85 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
         Upload Student Assignment Marks
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SelectComponent
-          label="Batch"
-          options={batches}
-          onChange={(value) => {
-            setSelectedBatch(value);
-            fetchSections(value);
-          }}
-        />
+      {loadingForm ? (
+        // Skeleton placeholders for the entire form when loading
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : (
+        // Actual form content once loading is done
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <SelectComponent
+            label="Batch"
+            options={batches}
+            onChange={(value) => {
+              setSelectedBatch(value);
+              fetchSections(value);
+            }}
+          />
 
-        <SelectComponent
-          label="Section"
-          options={sections}
-          onChange={(value) => {
-            setSelectedSection(value);
-            fetchStudents(selectedBatch, value);
-          }}
-        />
-        <SelectComponent
-          label="Reg. No"
-          options={regNos.map((student) => student.regNo)}
-          onChange={setSelectedRegNo}
-        />
-        <SelectComponent
-          label="Semester"
-          options={Object.keys(subjectsPerSemester)}
-          onChange={(value) => {
-            setSelectedSemester(value);
-            setSubjects(subjectsPerSemester[value]);
-          }}
-        />
-        <SelectComponent
-          label="Subject"
-          options={subjects}
-          onChange={setSelectedSubject}
-        />
-        <SelectComponent
-          label="Assignment"
-          options={["Assignment 1", "Assignment 2", "Assignment 3"]}
-          onChange={setSelectedAssignment}
-        />
-        <InputComponent
-          label="Enter Marks"
-          value={marks}
-          onChange={(e) => setMarks(e.target.value)}
-        />
-      </div>
+          <SelectComponent
+            label="Section"
+            options={sections}
+            disabled={sectionDisabled}
+            onChange={(value) => {
+              setSelectedSection(value);
+              fetchStudents(selectedBatch, value);
+            }}
+          />
+
+          <SelectComponent
+            label="Reg. No"
+            options={regNos.map((student) => student.regNo)}
+            disabled={studentDisabled}
+            onChange={(value) => {
+              setSelectedRegNo(value);
+              setSemesterDisabled(false); // Enable Semester after Reg. No is selected
+            }}
+          />
+
+          <SelectComponent
+            label="Semester"
+            options={Object.keys(subjectsPerSemester)}
+            disabled={semesterDisabled}
+            onChange={(value) => {
+              setSelectedSemester(value);
+              setSubjects(subjectsPerSemester[value]);
+              setSubjectDisabled(false); // Enable Subject after Semester is selected
+            }}
+          />
+
+          <SelectComponent
+            label="Subject"
+            options={subjects}
+            disabled={subjectDisabled}
+            onChange={(value) => {
+              setSelectedSubject(value);
+              setAssignmentDisabled(false); // Enable Assignment after Subject is selected
+            }}
+          />
+
+          <SelectComponent
+            label="Assignment"
+            options={["Assignment 1", "Assignment 2", "Assignment 3"]}
+            disabled={assignmentDisabled}
+            onChange={setSelectedAssignment}
+          />
+
+          <InputComponent
+            label="Enter Marks"
+            value={marks}
+            onChange={(e) => setMarks(e.target.value)}
+          />
+        </div>
+      )}
 
       <Button onClick={handleAssign} className="w-full mt-6" disabled={loading}>
         {loading ? <Loader /> : "Upload Marks"}
@@ -289,20 +339,23 @@ const StudentAssignmentForm: React.FC<StudentAssignmentFormProps> = ({
   );
 };
 
+// Select Component
 const SelectComponent = ({
   label,
   options,
   onChange,
+  disabled,
 }: {
   label: string;
   options: string[];
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) => (
   <div>
     <label className="block text-sm font-medium text-gray-600 mb-2">
       {label}
     </label>
-    <Select onValueChange={onChange}>
+    <Select onValueChange={onChange} disabled={disabled}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder={`Select ${label}`} />
       </SelectTrigger>
@@ -317,6 +370,7 @@ const SelectComponent = ({
   </div>
 );
 
+// Input Component
 const InputComponent = ({
   label,
   value,

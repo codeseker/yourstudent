@@ -6,6 +6,7 @@ import axios from "axios"; // Import AxiosError
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from "sonner";
 import { FaSpinner } from "react-icons/fa";
+import Sidebar from "@/app/components/Sidebar";
 
 interface DocumentResponse {
   success: boolean;
@@ -79,66 +80,74 @@ function UploadBatch() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-lg bg-white">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Upload Batch Data
-      </h2>
+    <div>
+      <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+        <div className="border-r shadow">
+          <Sidebar />
+        </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-2">Batch Year:</label>
-          <Input
-            type="text"
-            value={batchYear}
-            onChange={handleBatchYearChange}
-            placeholder="Enter Batch Year"
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <div>
-          <label className="block font-medium mb-2">
-            Section Name:{" "}
-            <span className="text-gray-700">Just Write A instead CS-A</span>
-          </label>
-          <Input
-            type="text"
-            value={sectionName}
-            onChange={handleSectionNameChange}
-            placeholder="Enter Section Name"
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <div>
-          <label className="block font-medium mb-2">Upload File:</label>
-          <Input
-            type="file"
-            onChange={handleFileChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <Button
-          type="submit"
-          className="w-full py-2 px-4 font-semibold rounded-md mt-4 flex justify-center items-center"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <FaSpinner className="animate-spin mr-2" />
-          ) : (
-            "Upload"
-          )}
-        </Button>
-      </form>
+        <div className="w-3/5 mx-auto h-3/5 mt-10 p-6 rounded-lg shadow-lg bg-white">
+          <h2 className="text-2xl font-semibold text-center mb-6">
+            Upload Batch Data
+          </h2>
 
-      <Separator className="my-4" />
-      <div className="flex justify-center items-center">
-        <Button>
-          <a href={"/assets/dummydata.xlsx"} download={"dummydata.xlsx"}>
-            Download Sample Excel
-          </a>
-        </Button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block font-medium mb-2">Batch Year:</label>
+              <Input
+                type="text"
+                value={batchYear}
+                onChange={handleBatchYearChange}
+                placeholder="Enter Batch Year"
+                className="w-full px-4 py-2 border rounded-md"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-2">
+                Section Name:{" "}
+                <span className="text-gray-700">Just Write A instead CS-A</span>
+              </label>
+              <Input
+                type="text"
+                value={sectionName}
+                onChange={handleSectionNameChange}
+                placeholder="Enter Section Name"
+                className="w-full px-4 py-2 border rounded-md"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-2">Upload File:</label>
+              <Input
+                type="file"
+                onChange={handleFileChange}
+                className="w-full px-4 py-2 border rounded-md"
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full py-2 px-4 font-semibold rounded-md mt-4 flex justify-center items-center"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <FaSpinner className="animate-spin mr-2" />
+              ) : (
+                "Upload"
+              )}
+            </Button>
+          </form>
+
+          <Separator className="my-4" />
+          <div className="flex justify-center items-center">
+            <Button>
+              <a href={"/assets/dummydata.xlsx"} download={"dummydata.xlsx"}>
+                Download Sample Excel
+              </a>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -4,14 +4,23 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const SearchComponent: React.FC = () => {
-  const [query, setQuery] = useState<string>();
+  const [query, setQuery] = useState<string>("");
   const router = useRouter();
+
   const handleClick = async () => {
-    router.push(`/teacher/students/${query}`);
+    if (query) {
+      router.push(`/teacher/students/${query}`);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleClick();
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center ">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center">
       {/* Title Section */}
       <h1 className="text-5xl font-bold text-gray-800 mb-2">Student</h1>
       <h2 className="text-4xl font-semibold text-orange-600 mb-6">
@@ -25,6 +34,7 @@ const SearchComponent: React.FC = () => {
           className="w-full pl-4 pr-12 py-3 border-2 border-gray-200 rounded-full hover:border-gray-300 focus:outline-none focus:border-red-500 transition-colors"
           placeholder="Search Students..."
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <Button
           onClick={handleClick}

@@ -1,8 +1,8 @@
 import React from "react";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import { FaSpinner } from "react-icons/fa";
 
 function Loader() {
-  return <AiOutlineLoading3Quarters className="animate-spin mr-2" />;
+  return <FaSpinner className="animate-spin" />;
 }
 
 export default Loader;

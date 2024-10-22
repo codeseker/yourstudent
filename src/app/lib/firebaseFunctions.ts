@@ -21,8 +21,8 @@ function delay(ms: number) {
 export async function addDataToDb(
   batchYear: string,
   sectionName: string,
-  excelData: any,
-  delayTime: number = 2000
+  excelData: any
+  // delayTime: number = 2000
 ) {
   try {
     // Reference to the specific batch document
@@ -44,7 +44,7 @@ export async function addDataToDb(
       );
       await setDoc(studentDocRef, mappedData, { merge: true });
 
-      await delay(delayTime);
+      // await delay(delayTime);
     }
 
     // Clear cache after updating
@@ -177,11 +177,21 @@ export async function getStudentDetail(
   }
 }
 
-export async function editDetail(batch: string, regNo: string, number: string) {
+export async function editDetail(
+  batch: string,
+  section: string,
+  regNo: string,
+  number: string
+) {
   try {
+    // Reference to the batch document
     const batchDocRef = doc(db, "batches", batch);
 
-    const studentDocRef = doc(batchDocRef, "students", regNo);
+    // Reference to the section document under the batch
+    const sectionDocRef = doc(batchDocRef, "sections", section);
+
+    // Reference to the student document under the section
+    const studentDocRef = doc(sectionDocRef, "students", regNo);
 
     // Get the student's document
     const studentDoc = await getDoc(studentDocRef);
@@ -201,7 +211,7 @@ export async function editDetail(batch: string, regNo: string, number: string) {
     return {
       message: "Error fetching or updating student data",
       success: false,
-      error: error.message,
+      error: error.message, // Include error message for debugging
     };
   }
 }
@@ -394,10 +404,10 @@ export async function queryStudent(name: string) {
             for (const studentDoc of studentDocs.docs) {
               const studentData = studentDoc.data();
 
-              // Check if the fullName matches the provided name
+              // Check if the fullName contains the provided name (case-insensitive)
               if (
                 studentData.fullName &&
-                studentData.fullName === name.toUpperCase()
+                studentData.fullName.toUpperCase().includes(name.toUpperCase())
               ) {
                 results.push({
                   id: studentDoc.id,

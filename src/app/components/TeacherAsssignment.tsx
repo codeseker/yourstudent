@@ -49,10 +49,13 @@ const TeacherAssignment: React.FC = () => {
   const [selectedBatch, setSelectedBatch] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedTeacher, setSelectedTeacher] = useState<string>("");
+
   const [assignedTeachers, setAssignedTeachers] = useState<Assignment[]>([]);
   const [batches, setBatches] = useState<SingleYear[]>([]);
   const [sections, setSections] = useState<SingleSection[]>([]);
+  const [sectionsLoading, setSectionsLoading] = useState<boolean>(false); // Loading state for sections
   const [loading, setLoading] = useState<boolean>(false);
+
   const teachers: string[] = [
     "vivek.saxena@poornima.org",
     "abhishekdhadich@poornima.org",
@@ -83,11 +86,12 @@ const TeacherAssignment: React.FC = () => {
   }, []);
 
   const getSections = async (batch: string) => {
+    setSectionsLoading(true); // Start loading sections
     const { data }: { data: SectionsResponse } = await axios.get(
       `/api/v1/allsections/${batch}`
     );
-
     setSections(data.sections);
+    setSectionsLoading(false); // Stop loading sections
   };
 
   const handleAssign = async () => {
@@ -162,9 +166,16 @@ const TeacherAssignment: React.FC = () => {
           <label className="block text-sm font-medium text-gray-600 my-2">
             Section
           </label>
-          <Select onValueChange={(value) => setSelectedSection(value)}>
+          <Select
+            onValueChange={(value) => setSelectedSection(value)}
+            disabled={sectionsLoading || sections.length === 0} // Disable while loading or no sections
+          >
             <SelectTrigger className="w-full bg-white">
-              <SelectValue placeholder="Select Section" />
+              <SelectValue
+                placeholder={
+                  sectionsLoading ? "Loading Sections..." : "Select Section"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               {sections.map((section, index) => (
@@ -196,7 +207,7 @@ const TeacherAssignment: React.FC = () => {
           <Button
             onClick={handleAssign}
             className="w-full flex justify-center items-center"
-            disabled={loading} // Disable button while loading
+            disabled={loading || sectionsLoading} // Disable button while loading
           >
             {loading ? <Loader /> : "Assign Teacher"}
           </Button>

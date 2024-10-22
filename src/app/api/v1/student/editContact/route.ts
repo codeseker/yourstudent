@@ -4,7 +4,7 @@ import cache from "@/app/lib/cache";
 
 export async function POST(req: NextRequest) {
   try {
-    const { number, batch, regNo } = await req.json();
+    const { number, batch, regNo, section } = await req.json();
 
     if (!number || !batch || !regNo) {
       return NextResponse.json(
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const response = await editDetail(batch, regNo, number);
+    const response = await editDetail(batch, section, regNo, number);
     if (!response.success) {
       return NextResponse.json(response, { status: 500 });
     }
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: "Internal Server Error", success: false },
       { status: 500 }

@@ -1,6 +1,21 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
+import { toast } from "sonner";
+import Loader from "./Loader";
 
 type StudentData = {
   tenthMaxMarks: number;
@@ -75,7 +90,55 @@ interface StudentDataProp {
   studentData: StudentData;
 }
 
+interface Res {
+  message: string;
+  success: boolean;
+}
+
 const StudentProfile = ({ studentData }: StudentDataProp) => {
+  const [contactNumber, setContactNumber] = useState<string>(""); // State to hold the contact number
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  // State to control dialog open/close
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const handleUpdateContact = async () => {
+    setLoading(true);
+    // Close the dialog after updating
+    const path = window.location.pathname;
+    const parts = path.split("/");
+    const batch = parts[3];
+    const section = parts[4];
+    const regNo = parts[5];
+
+    const { data }: { data: Res } = await axios.post(
+      "/api/v1/student/editContact",
+      {
+        number: contactNumber,
+        batch,
+        section,
+        regNo,
+      }
+    );
+
+    setLoading(false);
+
+    if (!data.success) {
+      toast.error(data.message);
+      return;
+    }
+    studentData.mobileNumber = contactNumber;
+    toast.success(data.message);
+
+    setIsDialogOpen(false);
+    setContactNumber("");
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      handleUpdateContact();
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
       <div className="container mx-auto py-8">
@@ -94,7 +157,35 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
                 <h1 className="text-xl font-bold">{studentData.fullName}</h1>
                 <p className="text-gray-700">{studentData.branch}</p>
                 <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                  <Button className="py-2 px-4 rounded">Edit Contact</Button>
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button onClick={() => setIsDialogOpen(true)}>
+                        Edit Contact
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit</DialogTitle>
+                        <DialogDescription>
+                          Are you sure? You want to update the contact details.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <Input
+                          type="text"
+                          value={contactNumber}
+                          onKeyDown={handleKeyDown}
+                          onChange={(e) => setContactNumber(e.target.value)}
+                          placeholder="Enter new contact number"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" onClick={handleUpdateContact}>
+                          {loading ? <Loader /> : "Confirm"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
               <hr className="my-6 border-t border-gray-300" />
