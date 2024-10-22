@@ -14,10 +14,15 @@ import firebaseData, {
 } from "@/app/lib/firebaseData";
 
 // Upload Data
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function addDataToDb(
   batchYear: string,
   sectionName: string,
-  excelData: any
+  excelData: any,
+  delayTime: number = 2000
 ) {
   try {
     // Reference to the specific batch document
@@ -38,6 +43,8 @@ export async function addDataToDb(
         mappedData.regNo // Assuming regNo is a unique identifier for each student
       );
       await setDoc(studentDocRef, mappedData, { merge: true });
+
+      await delay(delayTime);
     }
 
     // Clear cache after updating

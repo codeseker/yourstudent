@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
     const data = await req.formData();
 
     if (!data) {
+      console.error("No form data provided");
       return NextResponse.json(
         { message: "No Data provided", success: false },
         { status: 400 }
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
     const section: string = data.get("section") as string;
 
     if (!file) {
+      console.error("No file provided");
       return NextResponse.json(
         { message: "No file provided", success: false },
         { status: 400 }
@@ -43,18 +45,37 @@ export async function POST(req: NextRequest) {
     }
 
     if (!batch || !section) {
+      console.error("Batch or section missing");
       return NextResponse.json(
-        { message: "No data provided", success: false },
+        { message: "Batch or section missing", success: false },
         { status: 400 }
       );
     }
 
     // Convert the File object to a buffer for XLSX processing
-    const arrayBuffer = await file.arrayBuffer();
-    const fileBuffer = Buffer.from(arrayBuffer);
+    let fileBuffer;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      fileBuffer = Buffer.from(arrayBuffer);
+    } catch (fileError) {
+      console.error("Error converting file to buffer", fileError);
+      return NextResponse.json(
+        { message: "File processing error", success: false },
+        { status: 500 }
+      );
+    }
 
     // Read the Excel file from the buffer
-    const workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    let workbook;
+    try {
+      workbook = XLSX.read(fileBuffer, { type: "buffer" });
+    } catch (readError) {
+      console.error("Error reading Excel file", readError);
+      return NextResponse.json(
+        { message: "Failed to read Excel file", success: false },
+        { status: 500 }
+      );
+    }
 
     // Extract data from each sheet
     const worksheets: WorksheetData[] = workbook.SheetNames.map((sheetName) => {
@@ -65,6 +86,7 @@ export async function POST(req: NextRequest) {
         }
       );
 
+      // Format date columns in the sheet
       const formattedData = sheetData.map((row) => {
         Object.keys(row).forEach((key) => {
           if (typeof row[key] === "number" && key.includes("DOB")) {
@@ -82,21 +104,26 @@ export async function POST(req: NextRequest) {
 
     const excelData = worksheets[0].data;
 
-    const reponse: boolean = await addDataToDb(batch, section, excelData);
-    if (!reponse) {
+    // Firestore upload with delay
+    const response: boolean = await addDataToDb(batch, section, excelData);
+    if (!response) {
+      console.error("Failed to add document to Firestore");
       return NextResponse.json(
         {
           success: false,
-          message: "Document Failed",
+          message: "Failed to add document to Firestore",
         },
         { status: 400 }
       );
     }
+
+    // Clear cache after successful upload
     cache.del("batches");
+
     return NextResponse.json(
       {
         success: true,
-        message: "Document successfully Added",
+        message: "Document successfully added",
       },
       { status: 200 }
     );
@@ -106,6 +133,8 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
+
+    console.error("Internal Server Error:", errorMessage);
 
     return NextResponse.json(
       {
