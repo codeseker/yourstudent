@@ -6,6 +6,7 @@ import {
   setDoc,
   updateDoc,
   arrayUnion,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "@/app/lib/firebase";
 import cache from "@/app/lib/cache";
@@ -13,16 +14,11 @@ import firebaseData, {
   mapResponseToFirebaseData,
 } from "@/app/lib/firebaseData";
 
-// Upload Data
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
+// upload data
 export async function addDataToDb(
   batchYear: string,
   sectionName: string,
   excelData: any
-  // delayTime: number = 2000
 ) {
   try {
     // Reference to the specific batch document
@@ -33,22 +29,40 @@ export async function addDataToDb(
     const sectionDocRef = doc(collection(batchDocRef, "sections"), sectionName);
     await setDoc(sectionDocRef, { created: true }, { merge: true });
 
-    // Loop through each student entry and store them in the students subcollection under the section
+    // Firestore allows a maximum of 500 writes per batch.
+    let batch = writeBatch(db);
+    let operationCount = 0;
+    let operations = [];
+
     for (const ele of excelData) {
       const mappedData = mapResponseToFirebaseData(ele);
-
-      // Add student to the "students" subcollection under the respective section
       const studentDocRef = doc(
         collection(sectionDocRef, "students"),
-        mappedData.regNo // Assuming regNo is a unique identifier for each student
+        mappedData.regNo
       );
-      await setDoc(studentDocRef, mappedData, { merge: true });
+      batch.set(studentDocRef, mappedData, { merge: true });
 
-      // await delay(delayTime);
+      operationCount++;
+
+      // If batch size limit is reached (500 writes), commit the current batch and start a new one
+      if (operationCount === 500) {
+        operations.push(batch.commit());
+        batch = writeBatch(db); // Start a new batch
+        operationCount = 0; // Reset the count for the new batch
+      }
     }
+
+    // Commit any remaining batch operations that didn't reach 500
+    if (operationCount > 0) {
+      operations.push(batch.commit());
+    }
+
+    // Execute all batch commits concurrently
+    await Promise.all(operations);
 
     // Clear cache after updating
     cache.del("batches");
+
     return true;
   } catch (error) {
     console.error("Error adding data to Firestore:", error);
