@@ -32,7 +32,7 @@ export async function addDataToDb(
     // Firestore allows a maximum of 500 writes per batch.
     let batch = writeBatch(db);
     let operationCount = 0;
-    let operations = [];
+    const operations = [];
 
     for (const ele of excelData) {
       const mappedData = mapResponseToFirebaseData(ele);
