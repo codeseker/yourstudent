@@ -177,6 +177,14 @@ export function StudentDataTable({ data, userRole }: StudentTableProps) {
   return (
     <div>
       <div className="flex items-center py-4">
+      <Input
+          placeholder="Filter Names..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm mr-4"
+        />
         <Input
           placeholder="Filter By CGPA..."
           value={
@@ -193,8 +201,9 @@ export function StudentDataTable({ data, userRole }: StudentTableProps) {
           onChange={(event) =>
             table.getColumn("regNo")?.setFilterValue(event.target.value)
           }
-          className="max-w-sm "
+          className="max-w-sm mr-4"
         />
+        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
