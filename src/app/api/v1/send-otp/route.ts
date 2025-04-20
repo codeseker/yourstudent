@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import nodemailer from "nodemailer";
 import { otpCache } from '@/app/lib/cache';
 
-let pass = process.env.NEXT_PUBLIC_NODEMAILER_PASSWORD
+const pass = process.env.NEXT_PUBLIC_NODEMAILER_PASSWORD
   ?.split(";")[0]
   .replace(/"/g, "")
   .trim();
