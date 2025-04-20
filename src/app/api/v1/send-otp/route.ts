@@ -7,8 +7,8 @@ import { otpCache } from '@/app/lib/cache';
 const transporter = nodemailer.createTransport({
     service: 'gmail',
   auth: {
-    user: "2021pietcsayush034@poornima.org",
-    pass: "holsoihpretqklvv"
+    user: process.env.NODEMAILER_EMAIL,
+    pass: process.env.NODEMAILER_PASSWORD
   },
 });
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     otpCache.set(email.trim(), otp);
     // Send the OTP via email
     await transporter.sendMail({
-      from: "2021pietcsayush034@poornima.org",
+      from: process.env.NODEMAILER_EMAIL,
       to: email,
       subject: 'Your OTP for Teacher Registration',
       text: `Your OTP is: ${otp}`, // Send plain OTP for email
