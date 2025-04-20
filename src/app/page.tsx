@@ -24,6 +24,7 @@ export default function Home() {
     };
 
     if (status === "authenticated" && session?.user?.email) {
+      // checking email 
       checkValidUser();
     }
   }, [session, status]);
