@@ -5,6 +5,19 @@ import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 
+type Assignment = {
+  assignment: string;
+  marks: string | number;
+};
+
+type Subject = {
+  [subjectName: string]: Assignment[];
+};
+
+type Semester = {
+  [semesterName: string]: Subject;
+};
+
 type StudentData = {
   tenthMaxMarks: number;
   college: string;
@@ -69,6 +82,10 @@ type StudentData = {
   permanentAddress: string;
   homeTown: string;
   motherName: string;
+  assignments: Semester; // Include the assignments property here
+  [key: `sem${number}Marks`]: number | string | null;
+  [key: `sem${number}Percentage`]: number | string | null;
+  [key: `sem${number}Backlogs`]: number | string | null;
 };
 
 type StudentResponse = {
