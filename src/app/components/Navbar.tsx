@@ -27,6 +27,14 @@ const Header: React.FC = () => {
         </a>
 
         <div>
+        <Button
+            onClick={() => {
+              router.replace('/')
+            }}
+            className="mx-4 "
+          >
+            Home
+          </Button>
           <Button
             onClick={() => {
               if (

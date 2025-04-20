@@ -33,6 +33,12 @@ function Sidebar() {
             <Link href="/admin/student/assignment">Assignment Marks</Link>
           </li>
         </ul>
+        <Link
+        href="/"
+          className="w-full flex items-start p-4 hover:bg-accent"
+        >
+          Home
+        </Link>
         <button
           onClick={() => handleSignOut()}
           className="w-full flex items-start p-4 hover:bg-accent"

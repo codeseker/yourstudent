@@ -16,6 +16,20 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
 import Loader from "./Loader";
+import StudentAssignmentsDisplay from "./StudentAssignmentDisplay";
+
+type Assignment = {
+  assignment: string;
+  marks: string | number;
+};
+
+type Subject = {
+  [subjectName: string]: Assignment[];
+};
+
+type Semester = {
+  [semesterName: string]: Subject;
+};
 
 type StudentData = {
   tenthMaxMarks: number;
@@ -81,6 +95,7 @@ type StudentData = {
   permanentAddress: string;
   homeTown: string;
   motherName: string;
+  assignments: Semester;
   [key: `sem${number}Marks`]: number | string | null;
   [key: `sem${number}Percentage`]: number | string | null;
   [key: `sem${number}Backlogs`]: number | string | null;
@@ -96,14 +111,12 @@ interface Res {
 }
 
 const StudentProfile = ({ studentData }: StudentDataProp) => {
-  const [contactNumber, setContactNumber] = useState<string>(""); // State to hold the contact number
+  const [contactNumber, setContactNumber] = useState<string>("");
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  // State to control dialog open/close
-
   const [loading, setLoading] = useState<boolean>(false);
+
   const handleUpdateContact = async () => {
     setLoading(true);
-    // Close the dialog after updating
     const path = window.location.pathname;
     const parts = path.split("/");
     const batch = parts[3];
@@ -141,181 +154,105 @@ const StudentProfile = ({ studentData }: StudentDataProp) => {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <div className="container mx-auto py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 px-4">
-          {/* Left Section */}
-          <div className="col-span-1 sm:col-span-1">
-            <div className="bg-card shadow rounded-lg p-6">
-              <div className="flex flex-col items-center">
-                <Image
-                  width={120}
-                  height={120}
-                  src="https://randomuser.me/api/portraits/men/94.jpg"
-                  alt="Profile"
-                  className="rounded-full"
-                />
-                <h1 className="text-xl font-bold">{studentData.fullName}</h1>
-                <p className="text-gray-700">{studentData.branch}</p>
-                <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button onClick={() => setIsDialogOpen(true)}>
-                        Edit Contact
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit</DialogTitle>
-                        <DialogDescription>
-                          Are you sure? You want to update the contact details.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <Input
-                          type="text"
-                          value={contactNumber}
-                          onKeyDown={handleKeyDown}
-                          onChange={(e) => setContactNumber(e.target.value)}
-                          placeholder="Enter new contact number"
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit" onClick={handleUpdateContact}>
-                          {loading ? <Loader /> : "Confirm"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
+      <div className="container mx-auto py-8 px-4">
+        <div className="bg-white shadow-lg rounded-lg p-8 w-full">
+          <div className="flex flex-col sm:flex-row justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <Image
+                width={120}
+                height={120}
+                src="https://randomuser.me/api/portraits/men/94.jpg"
+                alt="Profile"
+                className="rounded-full"
+              />
+              <div>
+                <h1 className="text-2xl font-bold">{studentData.fullName}</h1>
+                <p className="text-gray-600">{studentData.branch}</p>
+              </div>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={() => setIsDialogOpen(true)}>Edit Contact</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Contact</DialogTitle>
+                  <DialogDescription>
+                    Update your contact details below.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Input
+                    type="text"
+                    value={contactNumber}
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => setContactNumber(e.target.value)}
+                    placeholder="Enter new contact number"
+                  />
                 </div>
-              </div>
-              <hr className="my-6 border-t border-gray-300" />
+                <DialogFooter>
+                  <Button type="submit" onClick={handleUpdateContact}>
+                    {loading ? <Loader /> : "Confirm"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
 
-              {/* Personal Details Section */}
-              <div className="flex flex-col">
-                <span className="text-primary uppercase font-bold tracking-wider mb-2">
-                  Personal Details
-                </span>
-                <ul>
-                  <li className="mb-2">
-                    <strong>Father&apos;s Name:</strong>{" "}
-                    {studentData.fatherName}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Mother&apos;s Name:</strong>{" "}
-                    {studentData.motherName}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Date of Birth:</strong> {studentData.dob}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Address:</strong> {studentData.permanentAddress}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Mobile Number:</strong> {studentData.mobileNumber}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Father&apos;s Mobile:</strong>{" "}
-                    {studentData.fatherMobileNo}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Gender:</strong> {studentData.gender}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Home Town:</strong> {studentData.homeTown}
-                  </li>
-                  <li className="mb-2">
-                    <strong>State:</strong> {studentData.state}
-                  </li>
-                  <li className="mb-2">
-                    <strong>Hosteller/Day Scholar:</strong>{" "}
-                    {studentData.hostellerOrDayscholar}
-                  </li>
-                </ul>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="col-span-1 bg-gray-50 p-6 rounded-lg shadow">
+              <h2 className="text-lg font-semibold">Personal Details</h2>
+              <ul className="mt-4 space-y-2">
+                <li><strong>Father's Name:</strong> {studentData.fatherName}</li>
+                <li><strong>Mother's Name:</strong> {studentData.motherName}</li>
+                <li><strong>Date of Birth:</strong> {studentData.dob}</li>
+                <li><strong>Address:</strong> {studentData.permanentAddress}</li>
+                <li><strong>Mobile Number:</strong> {studentData.mobileNumber}</li>
+                <li><strong>Gender:</strong> {studentData.gender}</li>
+                <li><strong>Home Town:</strong> {studentData.homeTown}</li>
+                <li><strong>State:</strong> {studentData.state}</li>
+              </ul>
+            </div>
+
+            <div className="col-span-1 bg-gray-50 p-6 rounded-lg shadow">
+              <h2 className="text-lg font-semibold">10th Grade</h2>
+              <ul className="mt-4 space-y-2">
+                <li><strong>Board:</strong> {studentData.tenthBoardName}</li>
+                <li><strong>Year of Passing:</strong> {studentData.tenthYearOfPass}</li>
+                <li><strong>Percentage:</strong> {studentData.tenthPercentage}%</li>
+              </ul>
+            </div>
+
+            <div className="col-span-1 bg-gray-50 p-6 rounded-lg shadow">
+              <h2 className="text-lg font-semibold">12th Grade</h2>
+              <ul className="mt-4 space-y-2">
+                <li><strong>Board:</strong> {studentData.twelfthBoardName}</li>
+                <li><strong>Year of Passing:</strong> {studentData.twelfthYearOfPass}</li>
+                <li><strong>Percentage:</strong> {studentData.twelfthPercentage}%</li>
+              </ul>
             </div>
           </div>
 
-          {/* Right Section */}
-          <div className="col-span-2 sm:col-span-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Tenth Grade Details */}
-              <div className="bg-card shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold">10th Grade</h3>
-                <ul className="list-disc list-inside">
-                  <li>
-                    <strong>Board:</strong> {studentData.tenthBoardName}
-                  </li>
-                  <li>
-                    <strong>Year of Passing:</strong>{" "}
-                    {studentData.tenthYearOfPass}
-                  </li>
-                  <li>
-                    <strong>Medium:</strong> {studentData.tenthMedium}
-                  </li>
-                  <li>
-                    <strong>Max Marks:</strong> {studentData.tenthMaxMarks}
-                  </li>
-                  <li>
-                    <strong>Marks Obtained:</strong>{" "}
-                    {studentData.tenthMarksObtained}
-                  </li>
-                  <li>
-                    <strong>Percentage:</strong> {studentData.tenthPercentage}%
-                  </li>
+          <h2 className="text-lg font-semibold mt-10 mb-6">Semester Details</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }, (_, index) => (
+              <div
+                className="bg-gray-50 p-6 rounded-lg shadow"
+                key={index}
+              >
+                <h3 className="text-md font-semibold">Semester {index + 1}</h3>
+                <ul className="mt-2 space-y-1">
+                  <li><strong>Marks:</strong> {studentData[`sem${index + 1}Marks`] || "N/A"}</li>
+                  <li><strong>Percentage:</strong> {studentData[`sem${index + 1}Percentage`] || "N/A"}%</li>
+                  <li><strong>Backlogs:</strong> {studentData[`sem${index + 1}Backlogs`] || "N/A"}</li>
                 </ul>
               </div>
+            ))}
+          </div>
 
-              {/* Twelfth Grade Details */}
-              <div className="bg-card shadow rounded-lg p-6">
-                <h3 className="text-lg font-semibold">12th Grade</h3>
-                <ul className="list-disc list-inside">
-                  <li>
-                    <strong>Board:</strong> {studentData.twelfthBoardName}
-                  </li>
-                  <li>
-                    <strong>Year of Passing:</strong>{" "}
-                    {studentData.twelfthYearOfPass}
-                  </li>
-                  <li>
-                    <strong>Medium:</strong> {studentData.twelfthMedium}
-                  </li>
-                  <li>
-                    <strong>Max Marks:</strong> {studentData.twelfthMaxMarks}
-                  </li>
-                  <li>
-                    <strong>Marks Obtained:</strong>{" "}
-                    {studentData.twelfthMarksObtained}
-                  </li>
-                  <li>
-                    <strong>Percentage:</strong> {studentData.twelfthPercentage}
-                    %
-                  </li>
-                </ul>
-              </div>
-
-              {/* Semester Details */}
-              {Array.from({ length: 8 }, (_, index) => (
-                <div className="bg-card shadow rounded-lg p-6" key={index}>
-                  <h3 className="text-lg font-semibold">
-                    Semester {index + 1}
-                  </h3>
-                  <ul className="list-disc list-inside">
-                    <li>
-                      <strong>Marks:</strong>{" "}
-                      {studentData[`sem${index + 1}Marks`] || "N/A"}
-                    </li>
-                    <li>
-                      <strong>Percentage:</strong>{" "}
-                      {studentData[`sem${index + 1}Percentage`] || "N/A"}%
-                    </li>
-                    <li>
-                      <strong>Backlogs:</strong>{" "}
-                      {studentData[`sem${index + 1}Backlogs`] || "N/A"}
-                    </li>
-                  </ul>
-                </div>
-              ))}
-            </div>
+          <div className="mt-10">
+          <h2 className="text-lg font-semibold mt-10 ">Assignment Marks</h2>
+            <StudentAssignmentsDisplay assignments={studentData.assignments} />
           </div>
         </div>
       </div>

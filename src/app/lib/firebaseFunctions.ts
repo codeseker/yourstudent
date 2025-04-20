@@ -469,3 +469,36 @@ export async function queryStudent(name: string) {
     };
   }
 }
+
+
+export async function storeValidMails(email: string) {
+  try {
+    // Reference the document for the email in the "allValidEmails" collection
+    const emailDocRef = doc(db, 'allValidEmails', email);
+
+    // Set the document with email and createdAt fields
+    await setDoc(
+      emailDocRef,
+      { email },
+      { merge: true } // Merge to avoid overwriting if the document exists
+    );
+
+    console.log(`Email ${email} successfully added/updated in the allValidEmails collection`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error storing email in Firebase:', error);
+    return { success: false, error: error };
+  }
+}
+
+export async function isEmailValid(email: string): Promise<boolean> {
+  try {
+    const emailDocRef = doc(db, "allValidEmails", email);
+    const emailDoc = await getDoc(emailDocRef);
+
+    return emailDoc.exists();
+  } catch (error) {
+    console.error("Error checking email validity:", error);
+    return false;
+  }
+}

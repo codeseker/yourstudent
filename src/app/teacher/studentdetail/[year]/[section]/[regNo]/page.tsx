@@ -4,6 +4,22 @@ import StudentDetailSkeleton from "@/app/components/StudentDetailSkeleton";
 import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
+import Navbar from "@/app/components/Navbar"
+
+
+
+type Assignment = {
+  assignment: string;
+  marks: string | number;
+};
+
+type Subject = {
+  [subjectName: string]: Assignment[];
+};
+
+type Semester = {
+  [semesterName: string]: Subject;
+};
 
 type StudentData = {
   tenthMaxMarks: number;
@@ -69,6 +85,10 @@ type StudentData = {
   permanentAddress: string;
   homeTown: string;
   motherName: string;
+  assignments: Semester; // Include the assignments property here
+  [key: `sem${number}Marks`]: number | string | null;
+  [key: `sem${number}Percentage`]: number | string | null;
+  [key: `sem${number}Backlogs`]: number | string | null;
 };
 
 type StudentResponse = {
@@ -87,6 +107,7 @@ const StudentDetail = () => {
       const { data } = await axios.get<StudentResponse>(
         `/api/v1/studentDetail/${year}/${section}/${regNo}`
       );
+      console.log('Student Data ->>> ', data);
       return data;
     } catch (error) {
       const axiosError = error as AxiosError;
@@ -114,7 +135,10 @@ const StudentDetail = () => {
   return (
     <div>
       {student ? (
-        <StudentProfile studentData={student} />
+        <div>
+          <Navbar/>
+          <StudentProfile studentData={student} />
+        </div>
       ) : (
         <StudentDetailSkeleton />
       )}
