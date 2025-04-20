@@ -32,6 +32,9 @@ function Sidebar() {
           <li className="p-4 hover:bg-accent rounded">
             <Link href="/admin/student/assignment">Assignment Marks</Link>
           </li>
+          <li className="p-4 hover:bg-accent rounded">
+            <Link href="/admin/addFaculty">Add Faculty</Link>
+          </li>
         </ul>
         <Link
         href="/"

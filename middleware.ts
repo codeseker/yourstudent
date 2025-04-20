@@ -4,7 +4,6 @@ import { isEmailValid} from "@/app/lib/firebaseFunctions";
 
 export async function middleware(req: NextRequest) {
 
-    console.log('I am middleware');
   // Define paths for easier management
   const loginPath = "/auth/login";
   const errorPath = "/error";
