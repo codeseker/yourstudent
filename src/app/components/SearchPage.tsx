@@ -53,12 +53,7 @@ const SearchComponent: React.FC = () => {
                 About Us
               </h2>
               <p className="mt-4 text-gray-600 text-lg">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-                quis eros at lacus feugiat hendrerit sed ut tortor. Suspendisse
-                et magna quis elit efficitur consequat. Mauris eleifend velit a
-                pretium iaculis. Donec sagittis velit et magna euismod, vel
-                aliquet nulla malesuada. Nunc pharetra massa lectus, a fermentum
-                arcu volutpat vel.
+              Poornima Institute of Engineering & Technology, Jaipur (PIET), a premier institution in engineering education, was established in the academic year 2007. It is affiliated to Rajasthan Technical University and approved by AICTE. PIET aims at providing world-class technical and scientific education that can develop a professional outlook in every walk of life and has been ranked 3rd in QIV ranking.
               </p>
               <div className="mt-8">
                 <a
